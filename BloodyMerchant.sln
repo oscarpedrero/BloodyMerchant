@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34003.232
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BloodyMerchant", "BloodyMerchant.csproj", "{433E34B8-F6C5-4DA9-8054-FBB21A09AE98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{433E34B8-F6C5-4DA9-8054-FBB21A09AE98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{433E34B8-F6C5-4DA9-8054-FBB21A09AE98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{433E34B8-F6C5-4DA9-8054-FBB21A09AE98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{433E34B8-F6C5-4DA9-8054-FBB21A09AE98}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {42C37E36-F0FB-4B7E-A87F-AEE4FD4E9287}
+	EndGlobalSection
+EndGlobal
