@@ -59,7 +59,7 @@ namespace BloodyMerchant.Commands
 
         // .merchant product add Test1 736318803 -257494203 20 1 50
         [Command("add", usage: "<NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]", description: "Add a product to a merchant", adminOnly: true)]
-        public void CreateProduct(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Stock, bool Autorefill)
+        public void CreateProduct(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Stock, bool Autorefill = false)
         {
             try
             {
