@@ -56,11 +56,11 @@ namespace BloodyMerchant.DB.Models
             return true;
         }
 
-        public bool AddProduct(int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
+        public bool AddProduct(int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount, bool Autorefill)
         {
             if(!GetProduct(ItemPrefabID, out ItemModel item))
             {
-                item = new ItemModel(ItemPrefabID, Stack, CurrencyfabID, Price, Amount);
+                item = new ItemModel(ItemPrefabID, Stack, CurrencyfabID, Price, Amount, Autorefill);
                 items.Add(item);
                 Database.saveDatabase();
                 return true;

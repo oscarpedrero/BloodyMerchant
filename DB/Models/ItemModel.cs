@@ -14,14 +14,16 @@ namespace BloodyMerchant.DB.Models
         public int InputItem { get; set; }
         public int InputAmount { get; set; }
         public int StockAmount { get; set; }
+        public bool Autorefill { get; set; }
 
-        public ItemModel(int outputItem, int outputAmount, int inputItem, int inputAmount, int stockAmount)
+        public ItemModel(int outputItem, int outputAmount, int inputItem, int inputAmount, int stockAmount, bool autorefill)
         {
             OutputItem = outputItem;
             OutputAmount = outputAmount;
             InputItem = inputItem;
             InputAmount = inputAmount;
             StockAmount = stockAmount;
+            Autorefill = autorefill;
         }
     }
 }
