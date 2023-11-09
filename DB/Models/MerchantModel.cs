@@ -102,7 +102,7 @@ namespace BloodyMerchant.DB.Models
         {
             if(!config.IsEnabled)
             {
-                UnitSpawnerService.UnitSpawner.SpawnWithCallback(sender, new PrefabGUID(-1810631919), new(pos.x, pos.z), -1, (Entity e) => {
+                UnitSpawnerService.UnitSpawner.SpawnWithCallback(sender, new PrefabGUID(PrefabGUID), new(pos.x, pos.z), -1, (Entity e) => {
                     merchantEntity = e;
                     config.z = pos.z;
                     config.x = pos.x;
