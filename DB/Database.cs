@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BloodyMerchant.DB.Models;
+using BloodyMerchant.Exceptions;
 using Steamworks;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,44 @@ namespace BloodyMerchant.DB
             if (!File.Exists(MerchantListFile)) File.WriteAllText(MerchantListFile, "[]");
             Plugin.Logger.LogInfo($"Create Database: OK");
             return true;
+        }
+
+        public static bool GetMerchant(string MerchantName, out MerchantModel merchant)
+        {
+            merchant = Merchants.Where(x => x.name == MerchantName).FirstOrDefault();
+            if (merchant == null)
+            {
+                throw new MerchantDontExistException();
+            }
+            return true;
+        }
+
+        public static bool AddMerchant(string MerchantName)
+        {
+            if (GetMerchant(MerchantName, out MerchantModel merchant))
+            {
+                throw new MerchantExistException();
+            }
+
+            merchant = new MerchantModel();
+            merchant.name = MerchantName;
+
+            Merchants.Add(merchant);
+            saveDatabase();
+            return true;
+
+        }
+
+        public static bool RemoveMerchant(string MerchantName)
+        {
+            if (GetMerchant(MerchantName, out MerchantModel merchant))
+            {
+                Merchants.Remove(merchant);
+                saveDatabase();
+                return true;
+            }
+
+            throw new MerchantDontExistException();
         }
     }
 }

@@ -33,15 +33,29 @@ namespace BloodyMerchant
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
 
-            world = VWorld.Server;
-
             GameData.OnInitialize += GameDataOnInitialize;
             GameData.OnDestroy += GameDataOnDestroy;
+
+            CommandRegistry.RegisterAll();
 
             Database.Initialize();
 
             // Plugin startup logic
             Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+        }
+
+        public override bool Unload()
+        {
+
+            Config.Clear();
+            CommandRegistry.UnregisterAssembly();
+
+            _harmony.UnpatchSelf();
+
+            GameData.OnDestroy -= GameDataOnDestroy;
+            GameData.OnInitialize -= GameDataOnInitialize;
+
+            return true;
         }
 
         private static void GameDataOnInitialize(World world)
@@ -56,6 +70,7 @@ namespace BloodyMerchant
 
         public void OnGameInitialized()
         {
+            world = VWorld.Server;
             Logger.LogInfo("OnGameInitialized");
         }
     }

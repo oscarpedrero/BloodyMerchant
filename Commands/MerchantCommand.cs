@@ -1,5 +1,9 @@
 ﻿using BloodyMerchant.DB;
 using BloodyMerchant.DB.Models;
+using BloodyMerchant.Exceptions;
+using ProjectM;
+using System;
+using System.Linq;
 using VampireCommandFramework;
 
 namespace BloodyMerchant.Commands
@@ -10,18 +14,56 @@ namespace BloodyMerchant.Commands
         [Command("create", usage: "<NameOfMerchant>", description: "Create a merchant", adminOnly: true)]
         public void CreateMerchant(ChatCommandContext ctx, string merchantName)
         {
-            var merchant = new MerchantModel();
-            merchant.name = merchantName;
 
-            Database.Merchants.Add(merchant);
+            try
+            {
+                if (Database.AddMerchant(merchantName))
+                {
+                    ctx.Reply($"Merchant '{merchantName}' created successfully");
+                }
 
-            Database.saveDatabase();
+            }
+            catch (MerchantExistException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' exist.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
 
-            ctx.Reply($"Merchant '{merchantName}' created successfully");
         }
 
-        [Command("product add", usage: "<NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Amount> ", description: "Add a product to a merchant", adminOnly: true)]
-        public void CreateProduct(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
+        [Command("remove", usage: "<NameOfMerchant>", description: "Remove a merchant", adminOnly: true)]
+        public void RemoveMerchant(ChatCommandContext ctx, string merchantName)
+        {
+
+            try
+            {
+                if (Database.RemoveMerchant(merchantName))
+                {
+                    ctx.Reply($"Merchant '{merchantName}' remove successfully");
+                }
+            }
+            catch (MerchantDontExistException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+
+        }
+
+        [Command("spawn", usage: "<NameOfMerchant>", description: "Spawn a merchant in your location", adminOnly: true)]
+        public void Spawn(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
+        {
+            ctx.Reply($"product successfully added to merchant '{merchantName}'");
+        }
+
+        [Command("kill", usage: "<NameOfMerchant>", description: "Kill a merchant", adminOnly: true)]
+        public void Kill(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
         {
             ctx.Reply($"product successfully added to merchant '{merchantName}'");
         }
