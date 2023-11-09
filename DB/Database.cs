@@ -14,12 +14,10 @@ using VRising.GameData;
 namespace BloodyMerchant.DB
 {
 
-    
-
     internal class Database
     {
 
-        public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, "BloodyShop");
+        public static readonly string ConfigPath = Path.Combine(Paths.ConfigPath, "BloodyMerchant");
         public static string MerchantListFile = Path.Combine(ConfigPath, "merchants.json");
 
         public static List<MerchantModel> Merchants { get; set; } = new();
@@ -27,6 +25,7 @@ namespace BloodyMerchant.DB
         public static void Initialize()
         {
             createDatabaseFiles();
+            loadDatabase();
         }
 
         public static bool saveDatabase()
@@ -73,12 +72,12 @@ namespace BloodyMerchant.DB
             merchant = Merchants.Where(x => x.name == MerchantName).FirstOrDefault();
             if (merchant == null)
             {
-                throw new MerchantDontExistException();
+                return false;
             }
             return true;
         }
 
-        public static bool AddMerchant(string MerchantName)
+        public static bool AddMerchant(string MerchantName, int prefabGUIDOfMerchant, bool immortal, bool canMove, bool autoRespawn)
         {
             if (GetMerchant(MerchantName, out MerchantModel merchant))
             {
@@ -87,6 +86,10 @@ namespace BloodyMerchant.DB
 
             merchant = new MerchantModel();
             merchant.name = MerchantName;
+            merchant.PrefabGUID = prefabGUIDOfMerchant;
+            merchant.config.Immortal = immortal;
+            merchant.config.CanMove = canMove;
+            merchant.config.Autorepawn = autoRespawn;
 
             Merchants.Add(merchant);
             saveDatabase();
@@ -98,6 +101,11 @@ namespace BloodyMerchant.DB
         {
             if (GetMerchant(MerchantName, out MerchantModel merchant))
             {
+                if(merchant.config.IsEnabled)
+                {
+                    throw new MerchantEnableException();
+                }
+
                 Merchants.Remove(merchant);
                 saveDatabase();
                 return true;

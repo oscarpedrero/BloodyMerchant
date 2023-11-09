@@ -12,6 +12,9 @@ using VampireCommandFramework;
 using ProjectM;
 using Unity.Collections;
 using BloodyMerchant.DB;
+using System.Linq;
+using BloodyMerchant.Systems;
+using BloodyMerchant.Services;
 
 namespace BloodyMerchant
 {
@@ -24,7 +27,7 @@ namespace BloodyMerchant
         public static ManualLogSource Logger;
         private Harmony _harmony;
 
-        public World world;
+        public static World World;
 
         public override void Load()
         {
@@ -32,6 +35,7 @@ namespace BloodyMerchant
             Logger = Log;
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
+            _harmony.PatchAll(typeof(ServerEvents));
 
             GameData.OnInitialize += GameDataOnInitialize;
             GameData.OnDestroy += GameDataOnDestroy;
@@ -46,7 +50,6 @@ namespace BloodyMerchant
 
         public override bool Unload()
         {
-
             Config.Clear();
             CommandRegistry.UnregisterAssembly();
 
@@ -61,6 +64,11 @@ namespace BloodyMerchant
         private static void GameDataOnInitialize(World world)
         {
             Logger.LogInfo("GameDataOnInitialize");
+            foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == true).ToList())
+            {
+                Plugin.Logger.LogInfo($"Autorespawn Merchant {merchant.name}");
+                merchant.AutorespawnMerchant();
+            }
         }
 
         private static void GameDataOnDestroy()
@@ -70,7 +78,7 @@ namespace BloodyMerchant
 
         public void OnGameInitialized()
         {
-            world = VWorld.Server;
+            World = VWorld.Server;
             Logger.LogInfo("OnGameInitialized");
         }
     }

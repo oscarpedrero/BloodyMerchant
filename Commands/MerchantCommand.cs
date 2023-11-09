@@ -1,9 +1,12 @@
-﻿using BloodyMerchant.DB;
+﻿using Bloodstone.API;
+using BloodyMerchant.DB;
 using BloodyMerchant.DB.Models;
 using BloodyMerchant.Exceptions;
 using ProjectM;
 using System;
 using System.Linq;
+using Unity.Entities;
+using Unity.Transforms;
 using VampireCommandFramework;
 
 namespace BloodyMerchant.Commands
@@ -11,17 +14,36 @@ namespace BloodyMerchant.Commands
     [CommandGroup("merchant")]
     internal class MerchantCommand
     {
-        [Command("create", usage: "<NameOfMerchant>", description: "Create a merchant", adminOnly: true)]
-        public void CreateMerchant(ChatCommandContext ctx, string merchantName)
+        [Command("list", usage: "", description: "List of merchant", adminOnly: true)]
+        public void ListMerchant(ChatCommandContext ctx)
         {
 
+            var merchants = Database.Merchants.ToList();
+
+            if(merchants.Count == 0)
+            {
+                throw ctx.Error($"There are no merchants created");
+            }
+            ctx.Reply($"Merchant List");
+            ctx.Reply($"----------------------------");
+            ctx.Reply($"--");
+            foreach ( var merchant in merchants)
+            {
+                ctx.Reply($"Merchant {merchant.name}");
+                ctx.Reply($"--");
+            }
+            ctx.Reply($"----------------------------");
+        }
+
+        [Command("create", usage: "<NameOfMerchant> [PrefabGUIDOfMerchant] [Immortal] [Move] [Autorespawn]", description: "Create a merchant", adminOnly: true)]
+        public void CreateMerchant(ChatCommandContext ctx, string merchantName, int prefabGUIDOfMerchant = -1810631919, bool immortal = false, bool canMove = true, bool autorespawn = true)
+        {
             try
             {
-                if (Database.AddMerchant(merchantName))
+                if (Database.AddMerchant(merchantName, prefabGUIDOfMerchant, immortal, canMove, autorespawn))
                 {
                     ctx.Reply($"Merchant '{merchantName}' created successfully");
                 }
-
             }
             catch (MerchantExistException)
             {
@@ -49,6 +71,10 @@ namespace BloodyMerchant.Commands
             {
                 throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
             }
+            catch (MerchantEnableException)
+            {
+                throw ctx.Error($"The merchant is in the world, you must kill the merchant with the command .merchant kill {merchantName}");
+            }
             catch (Exception e)
             {
                 throw ctx.Error($"Error: {e.Message}");
@@ -56,16 +82,68 @@ namespace BloodyMerchant.Commands
 
         }
 
+        // .merchant spawn Test1
         [Command("spawn", usage: "<NameOfMerchant>", description: "Spawn a merchant in your location", adminOnly: true)]
-        public void Spawn(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
+        public void Spawn(ChatCommandContext ctx, string merchantName)
         {
-            ctx.Reply($"product successfully added to merchant '{merchantName}'");
+            try
+            {
+                if (Database.GetMerchant(merchantName, out MerchantModel merchant))
+                {
+                    Entity user = ctx.Event.SenderUserEntity;
+                    var pos = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(user).Position;
+                    merchant.SpawnWithLocation(user, pos);
+                    ctx.Reply($"Merchant '{merchantName}' has spawned correctly");
+                } else
+                {
+                    throw new MerchantDontExistException();
+                }
+            }
+            catch (MerchantDontExistException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+            }
+            catch (MerchantEnableException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' already in world.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
         }
 
+        // .merchant kill Test1
         [Command("kill", usage: "<NameOfMerchant>", description: "Kill a merchant", adminOnly: true)]
-        public void Kill(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount)
+        public void Kill(ChatCommandContext ctx, string merchantName)
         {
-            ctx.Reply($"product successfully added to merchant '{merchantName}'");
+
+            try
+            {
+                if (Database.GetMerchant(merchantName, out MerchantModel merchant))
+                {
+                    Entity user = ctx.Event.SenderUserEntity;
+                    merchant.KillMerchant(user);
+                    ctx.Reply($"Merchant '{merchantName}' has killed correctly");
+                }
+                else
+                {
+                    throw new MerchantDontExistException();
+                }
+            }
+            catch (MerchantDontExistException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+            }
+            catch (MerchantDontEnableException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' does not exist in world.");
+            }
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+
         }
     }
 }
