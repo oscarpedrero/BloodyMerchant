@@ -113,7 +113,7 @@ This mod idea was suggested by [@Vex](https://ideas.vrisingmods.com/posts/96/enh
 
 [@Willis](https://github.com/emelonakos) for being an amazing community modder, providing the initial code that helped bring this idea to life.
 
-[@Backxtar](https://github.com/Backxtar), a talented modder who contributed by writing certain functions, debugging, and group efforts to make this mod work.
+[@Backxtar](https://github.com/Backxtar) owner & founder of [Bloody Mary](https://discord.gg/sE2hqbxUU4) server, a talented modder who contributed by writing certain functions, debugging, and group efforts to make this mod work.
 
 **Special thanks to the testers and supporters of the project:**
 
