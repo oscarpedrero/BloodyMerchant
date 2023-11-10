@@ -94,7 +94,7 @@ This server-side plugin mandates the following plugins for seamless operation:
 ```ansi
 .merchant config autorespawn <NameOfMerchant> <true/false>
 ```
-- Changes the auto spawn configuration for a certain merchant in real-time.
+- Changes the auto-spawn configuration for a certain merchant in real-time.
   - Example: `.merchant config autorespawn test true`
 
 # Resourcess
@@ -113,7 +113,7 @@ This mod idea was suggested by [@Vex](https://ideas.vrisingmods.com/posts/96/enh
 
 [@Willis](https://github.com/emelonakos) for being an amazing community modder, providing the initial code that helped bring this idea to life.
 
-[@Backxtar](https://github.com/Backxtar), a talented modder who contributed to debugging and group efforts to make this mod work.
+[@Backxtar](https://github.com/Backxtar), a talented modder who contributed by writing certain functions, debugging, and group efforts to make this mod work.
 
 **Special thanks to the testers and supporters of the project:**
 
