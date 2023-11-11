@@ -26,7 +26,6 @@ namespace BloodyMerchant.Systems
                 var _event = _entity.Read<TraderPurchaseEvent>();
                 Entity _trader = VWorld.Server.GetExistingSystem<NetworkIdSystem>()._NetworkIdToEntityMap[_event.Trader];
 
-                // if (!Plugin.Settings.ContainsTraderId(_trader.Read<Health>().MaxHealth)) continue; 
                 if (_trader.Read<Health>().MaxHealth.Value != 1) continue;
 
                 var _entryBuffer = _trader.ReadBuffer<TraderEntry>();
@@ -44,13 +43,10 @@ namespace BloodyMerchant.Systems
                         foreach (var merchant in Database.Merchants)
                         {
                             var item = merchant.items.Where(x => x.InputItem == _inputItem && x.OutputItem == _outputItem).FirstOrDefault();
-                            if (item != null)
+                            if (item != null && item.Autorefill)
                             {
-                                if (item.Autorefill)
-                                {
-                                    _newEntry.StockAmount = item.StockAmount;
-                                    _entryBuffer[i] = _newEntry;
-                                }
+                                _newEntry.StockAmount = item.StockAmount + 1;
+                                _entryBuffer[i] = _newEntry;
                                 break;
                             }
                         }
