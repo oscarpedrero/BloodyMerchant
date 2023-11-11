@@ -32,7 +32,7 @@ namespace BloodyMerchant.DB
         {
             try
             {
-                var jsonOutPut = JsonSerializer.Serialize(Merchants);
+                var jsonOutPut = JsonSerializer.Serialize(Merchants, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(MerchantListFile, jsonOutPut);
                 Plugin.Logger.LogInfo($"Save Database: OK");
                 return true;
