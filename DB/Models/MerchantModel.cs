@@ -5,17 +5,10 @@ using BloodyMerchant.Systems;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine.Analytics;
-using UnityEngine.TextCore;
-using static ProjectM.Network.ReceivePacketSystem;
 
 namespace BloodyMerchant.DB.Models
 {
@@ -151,9 +144,6 @@ namespace BloodyMerchant.DB.Models
                     StockAmount = item.StockAmount,
                 });
             }
-            var _health = merchant.Read<Health>();
-            _health.MaxHealth.Value = 1;
-            merchant.Write(_health);
 
             if (config.Immortal)
             {
@@ -166,6 +156,10 @@ namespace BloodyMerchant.DB.Models
                 merchant.Remove<MoveEntity>();
                 Plugin.Logger.LogInfo($"NPC Remove Move");
             }
+
+            var _health = merchant.Read<Health>();
+            _health.MaxHealth.Value = 1111;
+            merchant.Write(_health);
 
             // TODO: Under Investigate
             RenameMerchant(merchant, name);
