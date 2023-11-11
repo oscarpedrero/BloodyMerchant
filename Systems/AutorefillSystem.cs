@@ -26,7 +26,7 @@ namespace BloodyMerchant.Systems
                 var _event = _entity.Read<TraderPurchaseEvent>();
                 Entity _trader = VWorld.Server.GetExistingSystem<NetworkIdSystem>()._NetworkIdToEntityMap[_event.Trader];
 
-                if (_trader.Read<Health>().MaxHealth.Value != 1) continue;
+                if (_trader.Read<Health>().MaxHealth.Value != 1111) continue;
 
                 var _entryBuffer = _trader.ReadBuffer<TraderEntry>();
                 var _inputBuffer = _trader.ReadBuffer<TradeCost>();

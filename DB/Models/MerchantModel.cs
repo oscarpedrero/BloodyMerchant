@@ -157,6 +157,10 @@ namespace BloodyMerchant.DB.Models
                 Plugin.Logger.LogInfo($"NPC Remove Move");
             }
 
+            var _health = merchant.Read<Health>();
+            _health.MaxHealth.Value = 1111;
+            merchant.Write(_health);
+
             // TODO: Under Investigate
             RenameMerchant(merchant, name);
 
