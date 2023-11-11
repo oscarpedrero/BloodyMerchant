@@ -34,15 +34,17 @@ namespace BloodyMerchant.Systems
 
                 for (int i = 0; i < _entryBuffer.Length; i++)
                 {
+
                     TraderEntry _newEntry = _entryBuffer[i];
                     if (_entryBuffer[i].StockAmount == 1 && _event.ItemIndex == _newEntry.OutputStartIndex)
                     {
-                        int _outputItem = _outputBuffer[i].Item.GuidHash;
-                        int _inputItem = _inputBuffer[i].Item.GuidHash;
+                        PrefabGUID _outputItem = _outputBuffer[i].Item;
+                        PrefabGUID _inputItem = _inputBuffer[i].Item;
+
 
                         foreach (var merchant in Database.Merchants)
                         {
-                            var item = merchant.items.Where(x => x.InputItem == _inputItem && x.OutputItem == _outputItem).FirstOrDefault();
+                            var item = merchant.items.Where(x => new PrefabGUID(x.InputItem) == _inputItem && new PrefabGUID(x.OutputItem) == _outputItem).FirstOrDefault();
                             if (item != null && item.Autorefill)
                             {
                                 _newEntry.StockAmount = item.StockAmount + 1;

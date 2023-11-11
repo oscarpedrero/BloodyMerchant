@@ -36,6 +36,8 @@ namespace BloodyMerchant
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
             _harmony.PatchAll(typeof(ServerEvents));
+            _harmony.PatchAll(typeof(AutorefillSystem));
+            _harmony.PatchAll(typeof(UnitSpawnerService));
 
             GameData.OnInitialize += GameDataOnInitialize;
             GameData.OnDestroy += GameDataOnDestroy;

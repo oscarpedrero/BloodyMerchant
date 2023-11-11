@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>BloodyMerchant</AssemblyName>
     <Description>Create VRising NPC merchant</Description>
-    <Version>0.0.1</Version>
+    <Version>0.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -26,4 +26,9 @@
 			<Private>true</Private>
 		</Reference>
 	</ItemGroup>
+	<Target Name="CopyDLLsServer" AfterTargets="Build">
+		<Message Text="DLL to V Rising Server" Importance="High" />
+		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\steamcmd\steamapps\common\VRisingDedicatedServer\BepInEx\plugins\" />
+		<Message Text="DLL Server Copied OK" Importance="High" />
+	</Target>
 </Project>

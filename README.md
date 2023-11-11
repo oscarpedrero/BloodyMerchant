@@ -7,7 +7,14 @@
 <details>
 <summary>Changelog</summary>
 
-`0.1`
+`0.2.0`
+- Fix Autorefill
+- Fixed a problem with products that did not work correctly
+
+`0.1.0`
+- Fix Autorefill by [@Backxtar](https://github.com/Backxtar)
+
+`0.0.1`
 - Initial public release of the mod
 </details>
 

@@ -28,9 +28,9 @@ namespace BloodyMerchant.DB.Models
             foreach (var item in items)
             {
                 var itemTrader = new TraderItem(
-                    outputItem: new(item.OutputItem),
+                    outputItem: new PrefabGUID(item.OutputItem),
                     outputAmount: item.OutputAmount,
-                    inputItem: new(item.InputItem),
+                    inputItem: new PrefabGUID(item.InputItem),
                     inputAmount: item.InputAmount,
                     stockAmount: item.StockAmount
                     );
@@ -143,6 +143,7 @@ namespace BloodyMerchant.DB.Models
                     OutputStartIndex = i,
                     StockAmount = item.StockAmount,
                 });
+                i++;
             }
 
             if (config.Immortal)
