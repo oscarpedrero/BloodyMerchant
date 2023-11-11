@@ -47,7 +47,6 @@ namespace BloodyMerchant.Systems
                             {
                                 _newEntry.StockAmount = item.StockAmount + 1;
                                 _entryBuffer[i] = _newEntry;
-                                break;
                             }
                         }
                     }
