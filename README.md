@@ -1,6 +1,6 @@
 # BloodyMerchant
 
-**BloodyMerchant** is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay.
+**BloodyMerchant** is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay ( Vrising 1.0 ).
 
 ![BloodyMerchant](https://github.com/oscarpedrero/BloodyMerchant/blob/master/Images/BloodyMerchant.png?raw=true)
 
