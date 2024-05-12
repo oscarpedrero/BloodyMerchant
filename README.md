@@ -7,6 +7,10 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.0`
+- Fix with Autorespawn
+- Updated to a VRising 1.0 
+
 `0.2.0`
 - Fix Autorefill
 - Fixed a problem with products that did not work correctly

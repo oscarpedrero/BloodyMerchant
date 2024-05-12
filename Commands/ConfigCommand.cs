@@ -2,6 +2,7 @@
 using BloodyMerchant.DB.Models;
 using BloodyMerchant.Exceptions;
 using ProjectM;
+using Stunlock.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,10 +50,10 @@ namespace BloodyMerchant.Commands
                     merchant.config.Immortal = value;
                     if (value)
                     {
-                        merchant.MakeNPCImmortal(ctx.Event.SenderUserEntity, merchant.merchantEntity, new PrefabGUID(-61473528));
+                        merchant.MakeNPCImmortal(ctx.Event.SenderUserEntity, merchant.merchantEntity);
                     } else
                     {
-                        merchant.MakeNPCMortal(ctx.Event.SenderUserEntity, merchant.merchantEntity, new PrefabGUID(-61473528));
+                        merchant.MakeNPCMortal(ctx.Event.SenderUserEntity, merchant.merchantEntity);
                     }
 
                     Database.saveDatabase();
@@ -84,12 +85,12 @@ namespace BloodyMerchant.Commands
                     if (value)
                     {
                         merchant.merchantEntity.Add<MoveEntity>();
-                        Plugin.Logger.LogInfo($"NPC Add Move");
+                        Plugin.Logger.LogDebug($"NPC Add Move");
                     }
                     else
                     {
                         merchant.merchantEntity.Remove<MoveEntity>();
-                        Plugin.Logger.LogInfo($"NPC Remove Move");
+                        Plugin.Logger.LogDebug($"NPC Remove Move");
                     }
 
                     Database.saveDatabase();

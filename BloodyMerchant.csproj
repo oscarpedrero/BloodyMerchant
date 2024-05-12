@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>BloodyMerchant</AssemblyName>
     <Description>Create VRising NPC merchant</Description>
-    <Version>0.2.0</Version>
+    <Version>1.0.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
@@ -13,9 +13,9 @@
 	  <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" IncludeAssets="compile" />
 	  <PackageReference Include="BepInEx.Core" Version="6.0.0-be.668" IncludeAssets="compile" />
 	  <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-	  <PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
-	  <PackageReference Include="VRising.Unhollowed.Client" Version="0.6.5.57575090" />
+	  <PackageReference Include="VRising.Unhollowed.Client" Version="1.0.0.*" />
 	  <PackageReference Include="VRising.VampireCommandFramework" Version="0.8.*" />
+	  <PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
 	  <PackageReference Include="Fody" Version="6.7.0" PrivateAssets="All" />
 	  <PackageReference Include="ILMerge.Fody" Version="1.24.0" PrivateAssets="All" />
   </ItemGroup>
@@ -28,7 +28,7 @@
 	</ItemGroup>
 	<Target Name="CopyDLLsServer" AfterTargets="Build">
 		<Message Text="DLL to V Rising Server" Importance="High" />
-		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="D:\steamcmd\steamapps\common\VRisingDedicatedServer\BepInEx\plugins\" />
+		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\VRising_Server\BepInEx\plugins\" />
 		<Message Text="DLL Server Copied OK" Importance="High" />
 	</Target>
 </Project>

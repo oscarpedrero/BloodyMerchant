@@ -15,6 +15,7 @@ using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
 using BloodyMerchant.Services;
+using BloodyMerchant.Utils;
 
 namespace BloodyMerchant
 {
@@ -35,7 +36,6 @@ namespace BloodyMerchant
             Logger = Log;
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
-            _harmony.PatchAll(typeof(ServerEvents));
             _harmony.PatchAll(typeof(AutorefillSystem));
             _harmony.PatchAll(typeof(UnitSpawnerService));
 
@@ -65,23 +65,25 @@ namespace BloodyMerchant
 
         private static void GameDataOnInitialize(World world)
         {
-            Logger.LogInfo("GameDataOnInitialize");
-            foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == true).ToList())
+            Logger.LogDebug("GameDataOnInitialize");
+            foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
             {
-                Plugin.Logger.LogInfo($"Autorespawn Merchant {merchant.name}");
-                merchant.AutorespawnMerchant();
+                Plugin.Logger.LogDebug($"kill Autorespawn Merchant {merchant.name} off");
+
+                merchant.KillMerchant(Helper.GetAnyUser());
+
             }
         }
 
         private static void GameDataOnDestroy()
         {
-            Logger.LogInfo("GameDataOnDestroy");
+            Logger.LogDebug("GameDataOnDestroy");
         }
 
         public void OnGameInitialized()
         {
             World = VWorld.Server;
-            Logger.LogInfo("OnGameInitialized");
+            Logger.LogDebug("OnGameInitialized");
         }
     }
 }

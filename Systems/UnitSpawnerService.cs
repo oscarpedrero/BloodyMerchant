@@ -1,5 +1,8 @@
-﻿using HarmonyLib;
+﻿using Bloodstone.API;
+using HarmonyLib;
 using ProjectM;
+using ProjectM.Network;
+using Stunlock.Core;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
@@ -21,7 +24,7 @@ internal class UnitSpawnerService
     {
         var translation = Plugin.World.EntityManager.GetComponentData<Translation>(user);
         var f3pos = new float3(position.x, translation.Value.y, position.y); // TODO: investigate this copypasta
-        var usus = Plugin.World.GetExistingSystem<UnitSpawnerUpdateSystem>();
+        var usus = Plugin.World.GetExistingSystemManaged<UnitSpawnerUpdateSystem>();
 
         UnitSpawnerReactSystem_Patch.Enabled = true;
 
@@ -57,8 +60,9 @@ internal class UnitSpawnerService
         public static void Prefix(UnitSpawnerReactSystem __instance)
         {
             if (!Enabled) return;
-
-            var entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+            
+            var entities = __instance._Query.ToEntityArray(Unity.Collections.Allocator.Temp);
+            //var entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
 
             Plugin.Logger.LogDebug($"Processing {entities.Length} in UnitSpawnerReactionSystem");
 
@@ -86,6 +90,13 @@ internal class UnitSpawnerService
                     };
 
                     Plugin.World.EntityManager.SetComponentData(entity, newLifeTime);
+
+                    var _tradeOutputBuffer = entity.ReadBuffer<TradeOutput>();
+                    var _traderEntryBuffer = entity.ReadBuffer<TraderEntry>();
+                    var _tradeCostBuffer = entity.ReadBuffer<TradeCost>();
+                    _tradeOutputBuffer.Clear();
+                    _traderEntryBuffer.Clear();
+                    _tradeCostBuffer.Clear();
 
                     actions(entity);
                 }

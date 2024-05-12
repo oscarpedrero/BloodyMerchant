@@ -33,7 +33,7 @@ namespace BloodyMerchant.DB
             {
                 var jsonOutPut = JsonSerializer.Serialize(Merchants, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(MerchantListFile, jsonOutPut);
-                Plugin.Logger.LogInfo($"Save Database: OK");
+                Plugin.Logger.LogDebug($"Save Database: OK");
                 return true;
             }
             catch (Exception error)
@@ -49,7 +49,7 @@ namespace BloodyMerchant.DB
             {
                 string json = File.ReadAllText(MerchantListFile);
                 Merchants = JsonSerializer.Deserialize<List<MerchantModel>>(json);
-                Plugin.Logger.LogInfo($"Load Database: OK");
+                Plugin.Logger.LogDebug($"Load Database: OK");
                 return true;
             } catch (Exception error)
             {
@@ -62,7 +62,7 @@ namespace BloodyMerchant.DB
         {
             if (!Directory.Exists(ConfigPath)) Directory.CreateDirectory(ConfigPath);
             if (!File.Exists(MerchantListFile)) File.WriteAllText(MerchantListFile, "[]");
-            Plugin.Logger.LogInfo($"Create Database: OK");
+            Plugin.Logger.LogDebug($"Create Database: OK");
             return true;
         }
 

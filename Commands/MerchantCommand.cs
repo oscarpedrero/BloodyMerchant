@@ -117,7 +117,6 @@ namespace BloodyMerchant.Commands
         [Command("kill", usage: "<NameOfMerchant>", description: "Kill a merchant", adminOnly: true)]
         public void Kill(ChatCommandContext ctx, string merchantName)
         {
-
             try
             {
                 if (Database.GetMerchant(merchantName, out MerchantModel merchant))

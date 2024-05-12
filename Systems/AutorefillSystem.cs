@@ -1,8 +1,11 @@
 ﻿using Bloodstone.API;
 using BloodyMerchant.DB;
+using BloodyMerchant.Utils;
 using HarmonyLib;
 using ProjectM;
 using ProjectM.Network;
+using RootMotion.FinalIK;
+using Stunlock.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Entities;
+using static ProjectM.Metrics;
 
 namespace BloodyMerchant.Systems
 {
@@ -19,39 +23,29 @@ namespace BloodyMerchant.Systems
         [HarmonyPrefix]
         public static void Prefix(TraderPurchaseSystem __instance)
         {
-            var _entities = __instance.__TraderPurchaseJob_entityQuery.ToEntityArray(Allocator.Temp);
-
+            var networkIdLookupEntity = Helper.GetEntitiesByOneComponentTypes<NetworkIdSystem.Singleton>(EntityQueryOptions.IncludeSystems)[0];
+            var singleton = networkIdLookupEntity.Read<NetworkIdSystem.Singleton>();
+            Entity _trader;
+            var _entities = __instance._TraderPurchaseEventQuery.ToEntityArray(Allocator.Temp);
             foreach (var _entity in _entities)
             {
+
                 var _event = _entity.Read<TraderPurchaseEvent>();
-                Entity _trader = VWorld.Server.GetExistingSystem<NetworkIdSystem>()._NetworkIdToEntityMap[_event.Trader];
+                singleton.GetNetworkIdLookupRW().TryGetValue(_event.Trader, out _trader);
 
-                if (_trader.Read<Health>().MaxHealth.Value != 1111) continue;
-
-                var _entryBuffer = _trader.ReadBuffer<TraderEntry>();
-                var _inputBuffer = _trader.ReadBuffer<TradeCost>();
-                var _outputBuffer = _trader.ReadBuffer<TradeOutput>();
-
-                for (int i = 0; i < _entryBuffer.Length; i++)
+                if (_trader.Has<NameableInteractable>())
                 {
 
-                    TraderEntry _newEntry = _entryBuffer[i];
-                    if (_entryBuffer[i].StockAmount == 1 && _event.ItemIndex == _newEntry.OutputStartIndex)
+                    var name = _trader.Read<NameableInteractable>().Name.Value;
+
+                    foreach (var merchant in Database.Merchants.Where(x => x.name == name).ToList())
                     {
-                        PrefabGUID _outputItem = _outputBuffer[i].Item;
-                        PrefabGUID _inputItem = _inputBuffer[i].Item;
+                        merchant.Refill(_trader, _event);
 
-
-                        foreach (var merchant in Database.Merchants)
-                        {
-                            var item = merchant.items.Where(x => new PrefabGUID(x.InputItem) == _inputItem && new PrefabGUID(x.OutputItem) == _outputItem).FirstOrDefault();
-                            if (item != null && item.Autorefill)
-                            {
-                                _newEntry.StockAmount = item.StockAmount + 1;
-                                _entryBuffer[i] = _newEntry;
-                            }
-                        }
+                        
                     }
+                    
+                    
                 }
             }
         }
