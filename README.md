@@ -10,6 +10,7 @@
 `1.0.0`
 - Fix with Autorespawn
 - Updated to a VRising 1.0 
+- Added the functionality to show the icon on the merchant map
 
 `0.2.0`
 - Fix Autorefill

@@ -91,13 +91,6 @@ internal class UnitSpawnerService
 
                     Plugin.World.EntityManager.SetComponentData(entity, newLifeTime);
 
-                    var _tradeOutputBuffer = entity.ReadBuffer<TradeOutput>();
-                    var _traderEntryBuffer = entity.ReadBuffer<TraderEntry>();
-                    var _tradeCostBuffer = entity.ReadBuffer<TradeCost>();
-                    _tradeOutputBuffer.Clear();
-                    _traderEntryBuffer.Clear();
-                    _tradeCostBuffer.Clear();
-
                     actions(entity);
                 }
             }

@@ -7,6 +7,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
+using Stunlock.Core.Authoring;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,13 +15,18 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
+using static VCF.Core.Basics.RoleCommands;
 
 namespace BloodyMerchant.DB.Models
 {
     internal class MerchantModel
     {
         private static WaitForFrames _waitForFrames;
+        private static WaitForFrames _waitForFramesIcon;
+        private Entity icontEntity;
+
         public string name { get; set; } = string.Empty;
         public int PrefabGUID { get; set; }
         public List<ItemModel> items { get; set; } = new();
@@ -86,20 +92,21 @@ namespace BloodyMerchant.DB.Models
         {
 
             _waitForFrames = new WaitForFrames();
+            _waitForFramesIcon = new WaitForFrames();
 
             if (!config.IsEnabled)
             {
-
 
                 UnitSpawnerService.UnitSpawner.SpawnWithCallback(sender, new PrefabGUID(PrefabGUID), new(pos.x, pos.z), -1, (Entity e) => {
                     merchantEntity = e;
                     config.z = pos.z;
                     config.x = pos.x;
                     config.IsEnabled = true;
+                    ModifyMerchant(sender, e);
                     _waitForFrames.Start(
                         world =>
                         {
-                            ModifyMerchant(sender, e);
+                            Addinventory(e);
                             _waitForFrames.Stop();
                         },
                         input =>
@@ -112,8 +119,9 @@ namespace BloodyMerchant.DB.Models
 
                             var seconds = 1;
                             return TimeSpan.FromSeconds(seconds);
-                    });
+                        });
                 });
+
                 return true;
             }
 
@@ -123,6 +131,38 @@ namespace BloodyMerchant.DB.Models
         public void ModifyMerchant(Entity user, Entity merchant)
         {
 
+            if (config.Immortal)
+            {
+                bool _immortal = MakeNPCImmortal(user, merchant);
+                Plugin.Logger.LogDebug($"NPC immortal: {_immortal}");
+            }
+
+            if (!config.CanMove) 
+            {
+                bool _dontMove = MakeNPCDontMove(user, merchant);
+                Plugin.Logger.LogDebug($"NPC Dont Move");
+            }
+
+            RenameMerchant(merchant, name);
+
+            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
+                icontEntity = e;
+                e.Add<MapIconData>();
+                e.Add<MapIconTargetEntity>();
+                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
+                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchant);
+                mapIconTargetEntity.TargetNetworkId = merchant.Read<NetworkId>();
+                e.Write(mapIconTargetEntity);
+                e.Add<NameableInteractable>();
+                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
+                _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
+                e.Write(_nameableInteractable);
+            });
+
+        }
+
+        public void Addinventory(Entity merchant)
+        {
             var _items = GetTraderItems();
 
             var _tradeOutputBuffer = merchant.ReadBuffer<TradeOutput>();
@@ -160,21 +200,6 @@ namespace BloodyMerchant.DB.Models
                 });
                 i++;
             }
-
-            if (config.Immortal)
-            {
-                bool _immortal = MakeNPCImmortal(user, merchant);
-                Plugin.Logger.LogDebug($"NPC immortal: {_immortal}");
-            }
-
-            if (!config.CanMove) 
-            {
-                bool _dontMove = MakeNPCDontMove(user, merchant);
-                Plugin.Logger.LogDebug($"NPC Dont Move");
-            }
-
-            RenameMerchant(merchant, name);
-
         }
 
         public void Refill(Entity merchant, TraderPurchaseEvent _event)
@@ -201,6 +226,8 @@ namespace BloodyMerchant.DB.Models
             }
         }
 
+
+
         private void RenameMerchant( Entity merchant, string nameMerchant)
         {
             Plugin.Logger.LogDebug($"NPC Add Name");
@@ -219,6 +246,23 @@ namespace BloodyMerchant.DB.Models
                 if (_nameableInteractable.Name.Value == nameMerchant)
                 {
                     merchantEntity = entity;
+                    entities.Dispose();
+                    return true;
+                }
+            }
+            entities.Dispose();
+            return false;
+        }
+
+        private bool GetIcon( string nameMerchant )
+        {
+            var entities = Helper.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+            foreach (var entity in entities)
+            {
+                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
+                if (_nameableInteractable.Name.Value == nameMerchant + "_icon")
+                {
+                    icontEntity = entity;
                     entities.Dispose();
                     return true;
                 }
@@ -300,22 +344,28 @@ namespace BloodyMerchant.DB.Models
             return false;
         }
 
-        public bool KillMerchant(Entity user) {
-
-
-            if (GetEntity(name))
+        public bool KillMerchant(Entity user)
+        {
+            if (GetIcon(name))
             {
-                config.IsEnabled = false;
-                StatChangeUtility.KillEntity(Plugin.World.EntityManager, merchantEntity, user, 0, StatChangeReason.BloodConsumeBuffDestroySystem_0, true);
-                return true;
-            } else
-            {
-                Plugin.Logger.LogDebug($"Entity of merchant not found");
-                throw new MerchantDontExistException();
+                StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, icontEntity, user, user, 0, StatChangeReason.Any, true);
             }
 
-        }
+            {
+                if (GetEntity(name))
+                {
+                    config.IsEnabled = false;
+                    StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, merchantEntity, user, user, 0, StatChangeReason.Any, true);
+                    return true;
+                }
+                else
+                {
+                    Plugin.Logger.LogDebug($"Entity of merchant not found");
+                    throw new MerchantDontExistException();
+                }
 
+            }
+        }
 
     }
 }

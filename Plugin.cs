@@ -38,6 +38,7 @@ namespace BloodyMerchant
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
             _harmony.PatchAll(typeof(AutorefillSystem));
             _harmony.PatchAll(typeof(UnitSpawnerService));
+            _harmony.PatchAll(typeof(DeathEventListenerSystem_Patch));
 
             GameData.OnInitialize += GameDataOnInitialize;
             GameData.OnDestroy += GameDataOnDestroy;
