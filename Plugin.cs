@@ -1,21 +1,16 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
-using BepInEx.Configuration;
 using BepInEx.Logging;
-using VRising.GameData;
 using HarmonyLib;
 using Unity.Entities;
-using UnityEngine;
 using Bloodstone.API;
-using System;
 using VampireCommandFramework;
-using ProjectM;
-using Unity.Collections;
 using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
 using BloodyMerchant.Services;
 using BloodyMerchant.Utils;
+using Bloody.Core.API;
 
 namespace BloodyMerchant
 {
@@ -40,8 +35,8 @@ namespace BloodyMerchant
             _harmony.PatchAll(typeof(UnitSpawnerService));
             _harmony.PatchAll(typeof(DeathEventListenerSystem_Patch));
 
-            GameData.OnInitialize += GameDataOnInitialize;
-            GameData.OnDestroy += GameDataOnDestroy;
+            EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
+            EventsHandlerSystem.OnDestroy += GameDataOnDestroy;
 
             CommandRegistry.RegisterAll();
 
@@ -58,8 +53,8 @@ namespace BloodyMerchant
 
             _harmony.UnpatchSelf();
 
-            GameData.OnDestroy -= GameDataOnDestroy;
-            GameData.OnInitialize -= GameDataOnInitialize;
+            EventsHandlerSystem.OnDestroy -= GameDataOnDestroy;
+            EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
 
             return true;
         }

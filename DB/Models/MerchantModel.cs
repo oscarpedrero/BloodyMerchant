@@ -1,4 +1,6 @@
 ﻿using Bloodstone.API;
+using Bloody.Core.API;
+using Bloody.Core.Patch.Server;
 using BloodyMerchant.Exceptions;
 using BloodyMerchant.Services;
 using BloodyMerchant.Systems;
@@ -17,14 +19,11 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using static VCF.Core.Basics.RoleCommands;
 
 namespace BloodyMerchant.DB.Models
 {
     internal class MerchantModel
     {
-        private static WaitForFrames _waitForFrames;
-        private static WaitForFrames _waitForFramesIcon;
         private Entity icontEntity;
 
         public string name { get; set; } = string.Empty;
@@ -91,9 +90,6 @@ namespace BloodyMerchant.DB.Models
         public bool SpawnWithLocation(Entity sender, float3 pos)
         {
 
-            _waitForFrames = new WaitForFrames();
-            _waitForFramesIcon = new WaitForFrames();
-
             if (!config.IsEnabled)
             {
 
@@ -103,23 +99,11 @@ namespace BloodyMerchant.DB.Models
                     config.x = pos.x;
                     config.IsEnabled = true;
                     ModifyMerchant(sender, e);
-                    _waitForFrames.Start(
-                        world =>
-                        {
-                            Addinventory(e);
-                            _waitForFrames.Stop();
-                        },
-                        input =>
-                        {
-                            if (input is not int secondAutoUIr)
-                            {
-                                Plugin.Logger.LogError("Starting timer delay function parameter is not a valid integer");
-                                return TimeSpan.MaxValue;
-                            }
-
-                            var seconds = 1;
-                            return TimeSpan.FromSeconds(seconds);
-                        });
+                    var action = () =>
+                    {
+                        Addinventory(e);
+                    };
+                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
                 });
 
                 return true;
@@ -145,19 +129,7 @@ namespace BloodyMerchant.DB.Models
 
             RenameMerchant(merchant, name);
 
-            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
-                icontEntity = e;
-                e.Add<MapIconData>();
-                e.Add<MapIconTargetEntity>();
-                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
-                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchant);
-                mapIconTargetEntity.TargetNetworkId = merchant.Read<NetworkId>();
-                e.Write(mapIconTargetEntity);
-                e.Add<NameableInteractable>();
-                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
-                _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
-                e.Write(_nameableInteractable);
-            });
+            
 
         }
 
@@ -200,6 +172,29 @@ namespace BloodyMerchant.DB.Models
                 });
                 i++;
             }
+
+            var action = () =>
+            {
+                AddIcon(merchant);
+            };
+            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+        }
+
+        public void AddIcon(Entity merchant)
+        {
+            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
+                icontEntity = e;
+                e.Add<MapIconData>();
+                e.Add<MapIconTargetEntity>();
+                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
+                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchant);
+                mapIconTargetEntity.TargetNetworkId = merchant.Read<NetworkId>();
+                e.Write(mapIconTargetEntity);
+                e.Add<NameableInteractable>();
+                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
+                _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
+                e.Write(_nameableInteractable);
+            });
         }
 
         public void Refill(Entity merchant, TraderPurchaseEvent _event)
