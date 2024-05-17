@@ -37,6 +37,12 @@ This server-side plugin mandates the following plugins for seamless operation:
 2. Launch the server to create the config file; all configurations can be done in real-time in-game.
 
 ## Commands
+
+### Important note:
+The system is not in real time, that is, first we create the merchant, we add products to it and we spawn.
+
+If at any time we add or remove any product from the merchant we must kill it and spawn again!
+
 ```ansi
 .merchant list
 ```
