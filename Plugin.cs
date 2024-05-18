@@ -62,10 +62,13 @@ namespace BloodyMerchant
         private static void GameDataOnInitialize(World world)
         {
             Logger.LogDebug("GameDataOnInitialize");
+
+            EventsHandlerSystem.OnGameFrameUpdate += TimerSystem.OnGameFrame;
+
             foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
             {
-                Plugin.Logger.LogDebug($"kill Autorespawn Merchant {merchant.name} off");
 
+                Logger.LogDebug($"kill Autorespawn Merchant {merchant.name} off");
                 merchant.KillMerchant(Helper.GetAnyUser());
 
             }

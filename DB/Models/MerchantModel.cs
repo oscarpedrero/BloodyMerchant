@@ -103,7 +103,7 @@ namespace BloodyMerchant.DB.Models
                     {
                         Addinventory(e);
                     };
-                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+                    TimerSystem.RunActionOnceAfterFrames(action, 10);
                 });
 
                 return true;
@@ -177,7 +177,7 @@ namespace BloodyMerchant.DB.Models
             {
                 AddIcon(merchant);
             };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+            TimerSystem.RunActionOnceAfterFrames(action, 10);
         }
 
         public void AddIcon(Entity merchant)
@@ -232,7 +232,7 @@ namespace BloodyMerchant.DB.Models
             merchant.Write(_nameableInteractable);
         }
 
-        private bool GetEntity( string nameMerchant )
+        public bool GetEntity( string nameMerchant )
         {
             var entities = Helper.GetEntitiesByComponentTypes<NameableInteractable, TradeCost>(EntityQueryOptions.IncludeDisabledEntities);
             foreach (var entity in entities)
