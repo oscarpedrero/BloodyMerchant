@@ -8,7 +8,9 @@
 <summary>Changelog</summary>
 
 `1.0.3`
--
+- Refactored the Patch system
+- Added Bloody.Core.
+- Improved performance.
 
 `1.0.0`
 - Fix with Autorespawn
