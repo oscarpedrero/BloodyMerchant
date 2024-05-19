@@ -1,24 +1,17 @@
 ﻿using Bloodstone.API;
-using Bloody.Core.API;
-using Bloody.Core.Patch.Server;
+using Bloody.Core.Helper;
 using BloodyMerchant.Exceptions;
+using BloodyMerchant.Patch;
 using BloodyMerchant.Services;
-using BloodyMerchant.Systems;
-using BloodyMerchant.Utils;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
-using Stunlock.Core.Authoring;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEngine;
 
 namespace BloodyMerchant.DB.Models
 {
@@ -103,7 +96,7 @@ namespace BloodyMerchant.DB.Models
                     {
                         Addinventory(e);
                     };
-                    TimerSystem.RunActionOnceAfterFrames(action, 10);
+                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
                 });
 
                 return true;
@@ -177,12 +170,12 @@ namespace BloodyMerchant.DB.Models
             {
                 AddIcon(merchant);
             };
-            TimerSystem.RunActionOnceAfterFrames(action, 10);
+            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
         }
 
         public void AddIcon(Entity merchant)
         {
-            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
+            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Bloody.Core.Helper.Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
                 icontEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
@@ -234,7 +227,7 @@ namespace BloodyMerchant.DB.Models
 
         public bool GetEntity( string nameMerchant )
         {
-            var entities = Helper.GetEntitiesByComponentTypes<NameableInteractable, TradeCost>(EntityQueryOptions.IncludeDisabledEntities);
+            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, TradeCost>(EntityQueryOptions.IncludeDisabledEntities);
             foreach (var entity in entities)
             {
                 NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
@@ -251,7 +244,7 @@ namespace BloodyMerchant.DB.Models
 
         private bool GetIcon( string nameMerchant )
         {
-            var entities = Helper.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
             foreach (var entity in entities)
             {
                 NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();

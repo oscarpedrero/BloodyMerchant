@@ -8,9 +8,9 @@ using VampireCommandFramework;
 using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
-using BloodyMerchant.Services;
-using BloodyMerchant.Utils;
 using Bloody.Core.API;
+using BloodyMerchant.Patch;
+using static BloodyMerchant.Services.UnitSpawnerService;
 
 namespace BloodyMerchant
 {
@@ -31,9 +31,6 @@ namespace BloodyMerchant
             Logger = Log;
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll(System.Reflection.Assembly.GetExecutingAssembly());
-            _harmony.PatchAll(typeof(AutorefillSystem));
-            _harmony.PatchAll(typeof(UnitSpawnerService));
-            _harmony.PatchAll(typeof(DeathEventListenerSystem_Patch));
 
             EventsHandlerSystem.OnInitialize += GameDataOnInitialize;
             EventsHandlerSystem.OnDestroy += GameDataOnDestroy;
@@ -55,6 +52,8 @@ namespace BloodyMerchant
 
             EventsHandlerSystem.OnDestroy -= GameDataOnDestroy;
             EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
+            EventsHandlerSystem.OnDeath -= DeathEventSystem.OnDeath;
+            EventsHandlerSystem.OnUnitSpawned -= UnitSpawnerReactSystem_Patch.OnUnitSpawn;
 
             return true;
         }
@@ -63,13 +62,17 @@ namespace BloodyMerchant
         {
             Logger.LogDebug("GameDataOnInitialize");
 
-            EventsHandlerSystem.OnGameFrameUpdate += TimerSystem.OnGameFrame;
+            EventsHandlerSystem.OnTraderPurchase += AutorefillSystem.OnTraderPurchase;
+            EventsHandlerSystem.OnDeath += DeathEventSystem.OnDeath;
+            EventsHandlerSystem.OnUnitSpawned += UnitSpawnerReactSystem_Patch.OnUnitSpawn;
+
+            
 
             foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
             {
 
                 Logger.LogDebug($"kill Autorespawn Merchant {merchant.name} off");
-                merchant.KillMerchant(Helper.GetAnyUser());
+                merchant.KillMerchant(UserSystem.GetAnyUser());
 
             }
         }

@@ -5,6 +5,7 @@ using ProjectM.Network;
 using Stunlock.Core;
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -52,17 +53,14 @@ internal class UnitSpawnerService
 
     internal Dictionary<long, (float actualDuration, Action<Entity> Actions)> PostActions = new();
 
-    [HarmonyPatch(typeof(UnitSpawnerReactSystem), nameof(UnitSpawnerReactSystem.OnUpdate))]
     public static class UnitSpawnerReactSystem_Patch
     {
         public static bool Enabled { get; set; } = false;
 
-        public static void Prefix(UnitSpawnerReactSystem __instance)
+        public static void OnUnitSpawn(NativeArray<Entity> entities)
         {
             if (!Enabled) return;
             
-            var entities = __instance._Query.ToEntityArray(Unity.Collections.Allocator.Temp);
-            //var entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
 
             Plugin.Logger.LogDebug($"Processing {entities.Length} in UnitSpawnerReactionSystem");
 

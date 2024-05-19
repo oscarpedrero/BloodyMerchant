@@ -1,17 +1,23 @@
-﻿using System;
+﻿using HarmonyLib;
+using ProjectM;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace BloodyMerchant.Systems
+namespace BloodyMerchant.Patch
 {
-    internal class TimerSystem
+    [HarmonyPatch]
+    public class ActionSchedulerPatch
     {
+
         public static int CurrentFrameCount = 0;
         public static ConcurrentQueue<Action> actionsToExecuteOnMainThread = new ConcurrentQueue<Action>();
         public static List<Timer> activeTimers = [];
 
-        public static void OnGameFrame()
+        [HarmonyPatch(typeof(RandomizedSpawnChainUpdateSystem), nameof(RandomizedSpawnChainUpdateSystem.OnUpdate))]
+        [HarmonyPostfix]
+        public static void Postfix()
         {
             CurrentFrameCount++;
 
@@ -93,5 +99,8 @@ namespace BloodyMerchant.Systems
                 action.Invoke();  // Execute the action
             });
         }
+
+
     }
+    
 }

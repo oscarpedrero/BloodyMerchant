@@ -7,6 +7,9 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.3`
+-
+
 `1.0.0`
 - Fix with Autorespawn
 - Updated to a VRising 1.0 
