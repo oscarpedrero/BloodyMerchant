@@ -11,7 +11,7 @@ using VampireCommandFramework;
 
 namespace BloodyMerchant.Commands
 {
-    [CommandGroup("merchant")]
+    [CommandGroup("bm")]
     internal class MerchantCommand
     {
         [Command("list", usage: "", description: "List of merchant", adminOnly: true)]
@@ -40,6 +40,13 @@ namespace BloodyMerchant.Commands
         {
             try
             {
+                var merchatValid = Database.ValidMerchantIds.Where(x=> x == prefabGUIDOfMerchant).ToList();
+
+                if(merchatValid.Count <= 0)
+                {
+                    throw ctx.Error($"PrefabGUIDOfMerchant not valid");
+                }
+
                 if (Database.AddMerchant(merchantName, prefabGUIDOfMerchant, immortal, canMove, autorespawn))
                 {
                     ctx.Reply($"Merchant '{merchantName}' created successfully");

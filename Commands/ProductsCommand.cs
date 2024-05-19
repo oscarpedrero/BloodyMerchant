@@ -9,7 +9,7 @@ using System;
 namespace BloodyMerchant.Commands
 {
 
-    [CommandGroup("merchant product")]
+    [CommandGroup("bm product")]
     internal class ProductsCommand
     {
 

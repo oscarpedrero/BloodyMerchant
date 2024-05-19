@@ -2,18 +2,12 @@
 using BloodyMerchant.DB.Models;
 using BloodyMerchant.Exceptions;
 using ProjectM;
-using Stunlock.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using VampireCommandFramework;
 
 namespace BloodyMerchant.Commands
 {
-    [CommandGroup("merchant config")]
+    [CommandGroup("bm config")]
     internal class ConfigCommand
     {
         [Command("show", usage: "<NameOfMerchant>", description: "Show config of merchant", adminOnly: true)]

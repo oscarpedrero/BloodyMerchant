@@ -10,6 +10,7 @@
 `1.0.3`
 - Refactored the Patch system
 - Added Bloody.Core.
+- Added restriction to the create command so that only valid merchant PrefabsGUIDs can be added
 - Improved performance.
 
 `1.0.0`
@@ -41,19 +42,41 @@ This server-side plugin mandates the following plugins for seamless operation:
 1. Copy `BloodyMerchant.dll` to your `BepInEx/Plugins` directory.
 2. Launch the server to create the config file; all configurations can be done in real-time in-game.
 
-## Commands
-
 ### Important note:
 The system is not in real time, that is, first we create the merchant, we add products to it and we spawn.
-
 If at any time we add or remove any product from the merchant we must kill it and spawn again!
 
+## Merchant PrefabGUIDs
+
+Only merchant PrefabGUIDs are supported.
+
 ```ansi
-.merchant list
+  "CHAR_Trader_Dunley_Gems_T02": 194933933,
+  "CHAR_Trader_Dunley_Herbs_T02": 233171451,
+  "CHAR_Trader_Dunley_Knowledge_T02": 281572043,
+  "CHAR_Trader_Dunley_RareGoods_T02": -1594911649,
+  "CHAR_Trader_Farbane_Gems_T01": -1168705805,
+  "CHAR_Trader_Farbane_Herbs_T01": -375258845,
+  "CHAR_Trader_Farbane_Knowledge_T01": -208499374,
+  "CHAR_Trader_Farbane_RareGoods_T01": -1810631919,
+  "CHAR_Trader_Gloomrot_T04": -1292194494,
+  "CHAR_Trader_Noctem_Major": 1631713257,
+  "CHAR_Trader_Noctem_Minor": 345283594,
+  "CHAR_Trader_Silverlight_Gems_T03": -1990875761,
+  "CHAR_Trader_Silverlight_Herbs_T03": 1687896942,
+  "CHAR_Trader_Silverlight_Knowledge_T03": -915182578,
+  "CHAR_Trader_Silverlight_RareGoods_T03": 739223277
+```
+
+## Commands
+
+
+```ansi
+.bm list
 ```
 - Lists all available merchants on the server.
 ```ansi
-.merchant create <NameOfMerchant> [PrefabGUIDOfMerchant] [Immortal] [Move] [Autorespawn]
+.bm create <NameOfMerchant> [PrefabGUIDOfMerchant] [Immortal] [Move] [Autorespawn]
 ```
 - Creates a custom merchant and adds it to the merchant's list.
   - **NameOfMerchant**: Unique identifier for the merchant.
@@ -61,24 +84,24 @@ If at any time we add or remove any product from the merchant we must kill it an
   - **Immortal (True/False)**: Makes the merchant immortal and impervious to damage.
   - **Move (True/False)**: Enables or disables the merchant's movement.
   - **Auto respawn (True/False)**: Respawns the merchant when the server is back online.
-  - Example: `.merchant create test -208499374 true false true`
+  - Example: `.bm create test -208499374 true false true`
 ```ansi
-.merchant remove <NameOfMerchant>
+.bm remove <NameOfMerchant>
 ```
 - Removes the merchant from the list (requires killing the merchant while alive).
-  - Example: `.merchant remove test`
+  - Example: `.bm remove test`
 ```ansi
-.merchant spawn <NameOfMerchant>
+.bm spawn <NameOfMerchant>
 ```
 - Spawns your custom merchant.
-  - Example: `.merchant spawn test`
+  - Example: `.bm spawn test`
 ```ansi
-.merchant kill <NameOfMerchant>
+.bm kill <NameOfMerchant>
 ```
 - Kills the desired merchant.
-  - Example: `.merchant kill test`
+  - Example: `.bm kill test`
 ```ansi
-.merchant product add <NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]
+.bm product add <NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]
 ```
 - Adds products to the merchant in real-time.
   - **NameOfMerchat**: Unique merchant name set previously.
@@ -88,37 +111,37 @@ If at any time we add or remove any product from the merchant we must kill it an
   - **Price**: Amount of currency item players need to purchase the item.
   - **Stock**: Availability of the item with the merchant (limited or unlimited, max is 99).
   - **Autorefill (True/False)**: Allows players to buy the item infinitely.
-  - Example: `.merchant product add test 1557814269 -77477508 1 1 99 true`
+  - Example: `.bm product add test 1557814269 -77477508 1 1 99 true`
 ```ansi
-.merchant product remove <NameOfMerchant> <ItemPrefabID>
+.bm product remove <NameOfMerchant> <ItemPrefabID>
 ```
 - Removes a product from the merchant in real-time.
-  - Example: `.merchant product remove test 1557814269`
+  - Example: `.bm product remove test 1557814269`
 ```ansi
-.merchant product list <NameOfMerchant>
+.bm product list <NameOfMerchant>
 ```
 - Lists all products currently available for sale by a certain merchant.
-  - Example:  `.merchant product list test`
+  - Example:  `.bm product list test`
 ```ansi
-.merchant config show <NameOfMerchant>
+.bm config show <NameOfMerchant>
 ```
 - Shows the Immortal, Move, and Autospawn configuration for a certain merchant.
-  - Example: `.merchant config show test`
+  - Example: `.bm config show test`
 ```ansi
-.merchant config immortal <NameOfMerchant> <true/false>
+.bm config immortal <NameOfMerchant> <true/false>
 ```
 - Changes the immortal configuration for a certain merchant in real-time.
-  - Example: `.merchant config immortal test true`
+  - Example: `.bm config immortal test true`
 ```ansi
-.merchant config move <NameOfMerchant> <true/false>
+.bm config move <NameOfMerchant> <true/false>
 ```
 - Changes the move configuration for a certain merchant in real-time.
-  - Example: `.merchant config move test true`
+  - Example: `.bm config move test true`
 ```ansi
-.merchant config autorespawn <NameOfMerchant> <true/false>
+.bm config autorespawn <NameOfMerchant> <true/false>
 ```
 - Changes the auto-spawn configuration for a certain merchant in real-time.
-  - Example: `.merchant config autorespawn test true`
+  - Example: `.bm config autorespawn test true`
 
 # Resourcess
 
