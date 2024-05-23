@@ -1,5 +1,5 @@
 ﻿using Bloodstone.API;
-using Bloody.Core.Helper;
+using Bloody.Core.Helper.v1;
 using BloodyMerchant.Exceptions;
 using BloodyMerchant.Patch;
 using BloodyMerchant.Services;
@@ -175,7 +175,7 @@ namespace BloodyMerchant.DB.Models
 
         public void AddIcon(Entity merchant)
         {
-            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Bloody.Core.Helper.Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
+            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Bloody.Core.Helper.v1.Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
                 icontEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();

@@ -8,8 +8,7 @@ using VampireCommandFramework;
 using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
-using Bloody.Core.API;
-using BloodyMerchant.Patch;
+using Bloody.Core.API.v1;
 using static BloodyMerchant.Services.UnitSpawnerService;
 
 namespace BloodyMerchant
@@ -17,6 +16,7 @@ namespace BloodyMerchant
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency("gg.deca.Bloodstone")]
     [BepInDependency("gg.deca.VampireCommandFramework")]
+    [BepInDependency("trodi.Bloody.Core")]
     public class Plugin : BasePlugin, IRunOnInitialized
     {
 

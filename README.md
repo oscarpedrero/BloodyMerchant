@@ -7,6 +7,9 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.4`
+- Bloody.Core dependency removed as dll and added as framework
+
 `1.0.3`
 - Refactored the Patch system
 - Added Bloody.Core.
@@ -32,11 +35,12 @@
 ## Mod Features
 BloodyMerchant is a key component of the Blood Mod Pack. This plugin empowers you to craft personalized in-game traders, akin to BloodyShop. However, it leverages in-game traders, providing a more dynamic and immersive experience.
 
-This server-side plugin mandates the following plugins for seamless operation:
+# Requirements
 
 1. [BepInEx](https://github.com/BepInEx/BepInEx)
 2. [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
 3. [Bloodstone](https://github.com/decaprime/Bloodstone)
+3. [Bloody.Core](https://github.com/oscarpedrero/BloodyCore)
 
 ## Installation
 1. Copy `BloodyMerchant.dll` to your `BepInEx/Plugins` directory.

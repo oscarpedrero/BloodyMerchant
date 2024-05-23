@@ -1,4 +1,4 @@
-﻿using Bloody.Core.Helper;
+﻿using Bloody.Core.Helper.v1;
 using BloodyMerchant.DB;
 using ProjectM;
 using ProjectM.Network;
