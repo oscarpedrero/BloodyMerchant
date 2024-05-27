@@ -1,11 +1,12 @@
 ﻿{
   "name": "BloodyMerchant",
-  "version_number": "0.2.0",
+  "version_number": "1.0.5",
   "website_url": "https://github.com/oscarpedrero/BloodyMerchant",
   "description": "BloodyMerchant is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay.",
   "dependencies": [
     "BepInEx-BepInExPack_V_Rising-1.668.5",
     "deca-Bloodstone-0.1.6",
-    "deca-VampireCommandFramework-0.8.0"
+    "deca-VampireCommandFramework-0.9.0",
+    "Trodi-BloodyCore-1.2.2"
   ]
 }

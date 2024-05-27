@@ -1,13 +1,12 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
-
 # BloodyMerchant
 
 **BloodyMerchant** is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay ( Vrising 1.0 ).
 
-![BloodyMerchant](https://github.com/oscarpedrero/BloodyMerchant/blob/master/Images/BloodyMerchant.png?raw=true)
-
 <details>
 <summary>Changelog</summary>
+
+`1.0.5`
+- Add or remove items from merchant in real time
 
 `1.0.4`
 - Bloody.Core dependency removed as dll and added as framework
@@ -34,15 +33,19 @@
 - Initial public release of the mod
 </details>
 
+# Support this project
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
+
 ## Mod Features
 BloodyMerchant is a key component of the Blood Mod Pack. This plugin empowers you to craft personalized in-game traders, akin to BloodyShop. However, it leverages in-game traders, providing a more dynamic and immersive experience.
 
 # Requirements
 
-1. [BepInEx](https://github.com/BepInEx/BepInEx)
-2. [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework)
-3. [Bloodstone](https://github.com/decaprime/Bloodstone)
-3. [Bloody.Core](https://github.com/oscarpedrero/BloodyCore)
+1. [BepInEx](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
+2. [Bloodstone](https://thunderstore.io/c/v-rising/p/deca/Bloodstone/)
+3. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
+4. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
 
 ## Installation
 1. Copy `BloodyMerchant.dll` to your `BepInEx/Plugins` directory.
@@ -170,5 +173,3 @@ This mod idea was suggested by [@Vex](https://ideas.vrisingmods.com/posts/96/enh
 **Special thanks to the testers and supporters of the project:**
 
 - @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
-
-![Bloody](https://github.com/oscarpedrero/BloodyMerchant/blob/master/Images/Bloody.png?raw=true)

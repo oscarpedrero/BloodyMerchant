@@ -9,7 +9,6 @@ using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
 using Bloody.Core.API.v1;
-using static BloodyMerchant.Services.UnitSpawnerService;
 
 namespace BloodyMerchant
 {
@@ -53,7 +52,6 @@ namespace BloodyMerchant
             EventsHandlerSystem.OnDestroy -= GameDataOnDestroy;
             EventsHandlerSystem.OnInitialize -= GameDataOnInitialize;
             EventsHandlerSystem.OnDeath -= DeathEventSystem.OnDeath;
-            EventsHandlerSystem.OnUnitSpawned -= UnitSpawnerReactSystem_Patch.OnUnitSpawn;
 
             return true;
         }
@@ -64,9 +62,6 @@ namespace BloodyMerchant
 
             EventsHandlerSystem.OnTraderPurchase += AutorefillSystem.OnTraderPurchase;
             EventsHandlerSystem.OnDeath += DeathEventSystem.OnDeath;
-            EventsHandlerSystem.OnUnitSpawned += UnitSpawnerReactSystem_Patch.OnUnitSpawn;
-
-            
 
             foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
             {

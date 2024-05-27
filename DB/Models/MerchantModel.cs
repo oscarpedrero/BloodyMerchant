@@ -1,8 +1,8 @@
 ﻿using Bloodstone.API;
+using Bloody.Core.API.v1;
 using Bloody.Core.Helper.v1;
 using BloodyMerchant.Exceptions;
 using BloodyMerchant.Patch;
-using BloodyMerchant.Services;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -61,6 +61,7 @@ namespace BloodyMerchant.DB.Models
                 item = new ItemModel(ItemPrefabID, Stack, CurrencyfabID, Price, Amount, Autorefill);
                 items.Add(item);
                 Database.saveDatabase();
+                AddRealtimeObjet(item);
                 return true;
             }
 
@@ -74,6 +75,7 @@ namespace BloodyMerchant.DB.Models
             {
                 items.Remove(item);
                 Database.saveDatabase();
+                RemoveRealtimeObjet(item);
                 return true;
             }
 
@@ -86,7 +88,7 @@ namespace BloodyMerchant.DB.Models
             if (!config.IsEnabled)
             {
 
-                UnitSpawnerService.UnitSpawner.SpawnWithCallback(sender, new PrefabGUID(PrefabGUID), new(pos.x, pos.z), -1, (Entity e) => {
+                SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(pos.x, pos.z), -1, (Entity e) => {
                     merchantEntity = e;
                     config.z = pos.z;
                     config.x = pos.x;
@@ -122,8 +124,6 @@ namespace BloodyMerchant.DB.Models
 
             RenameMerchant(merchant, name);
 
-            
-
         }
 
         public void Addinventory(Entity merchant)
@@ -155,10 +155,10 @@ namespace BloodyMerchant.DB.Models
 
                 _traderEntryBuffer.Add(new TraderEntry
                 {
-                    RechargeInterval = -1,
+                    RechargeInterval = 10,
                     CostCount = 1,
                     CostStartIndex = (byte)i,
-                    FullRechargeTime = -1,
+                    FullRechargeTime = 60,
                     OutputCount = 1,
                     OutputStartIndex = (byte)i,
                     StockAmount = (ushort)item.StockAmount,
@@ -173,9 +173,66 @@ namespace BloodyMerchant.DB.Models
             ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
         }
 
+        internal bool AddRealtimeObjet(ItemModel item)
+        {
+            if (GetEntity(name))
+            {
+
+                var _tradeOutputBuffer = merchantEntity.ReadBuffer<TradeOutput>();
+                var _traderEntryBuffer = merchantEntity.ReadBuffer<TraderEntry>();
+                var _tradeCostBuffer = merchantEntity.ReadBuffer<TradeCost>();
+
+                var i = _tradeCostBuffer.Length;
+
+                _tradeOutputBuffer.Add(new TradeOutput
+                {
+                    Amount = (ushort)item.OutputAmount,
+                    Item = new PrefabGUID(item.OutputItem),
+                });
+
+                _tradeCostBuffer.Add(new TradeCost
+                {
+                    Amount = (ushort)item.InputAmount,
+                    Item = new PrefabGUID(item.InputItem),
+                });
+
+                _traderEntryBuffer.Add(new TraderEntry
+                {
+                    RechargeInterval = 10,
+                    CostCount = 1,
+                    CostStartIndex = (byte)i,
+                    FullRechargeTime = 60,
+                    OutputCount = 1,
+                    OutputStartIndex = (byte)i,
+                    StockAmount = (ushort)item.StockAmount,
+                });
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
+        internal bool RemoveRealtimeObjet(ItemModel item)
+        {
+            if (GetEntity(name))
+            {
+                Addinventory(merchantEntity);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
         public void AddIcon(Entity merchant)
         {
-            UnitSpawnerService.UnitSpawner.SpawnWithCallback(merchant, Bloody.Core.Helper.v1.Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
+            SpawnSystem.SpawnUnitWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
                 icontEntity = e;
                 e.Add<MapIconData>();
                 e.Add<MapIconTargetEntity>();
@@ -219,7 +276,10 @@ namespace BloodyMerchant.DB.Models
         private void RenameMerchant( Entity merchant, string nameMerchant)
         {
             Plugin.Logger.LogDebug($"NPC Add Name");
-            merchant.Add<NameableInteractable>();
+            if (!merchant.Has<NameableInteractable>())
+            {
+                merchant.Add<NameableInteractable>();
+            }
             NameableInteractable _nameableInteractable = merchant.Read<NameableInteractable>();
             _nameableInteractable.Name = new FixedString64Bytes(nameMerchant);
             merchant.Write(_nameableInteractable);
