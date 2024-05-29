@@ -5,6 +5,9 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.6`
+- Added a command to clear all items from a merchant
+
 `1.0.5`
 - Add or remove items from merchant in real time
 
@@ -126,6 +129,11 @@ Only merchant PrefabGUIDs are supported.
 ```
 - Removes a product from the merchant in real-time.
   - Example: `.bm product remove test 1557814269`
+```ansi
+.bm product clean <NameOfMerchant>
+```
+- Removes a product from the merchant in real-time.
+  - Example: `.bm product clean test`
 ```ansi
 .bm product list <NameOfMerchant>
 ```

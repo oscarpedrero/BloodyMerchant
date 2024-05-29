@@ -58,6 +58,38 @@ namespace BloodyMerchant.Commands
         }
 
         // .merchant product add Test1 736318803 -257494203 20 1 50
+        [Command("clean", usage: "<NameOfMerchant>", description: "Clean all products to a merchant", adminOnly: true)]
+        public void CleanProducts(ChatCommandContext ctx, string merchantName)
+        {
+            try
+            {
+                if(Database.GetMerchant(merchantName, out MerchantModel merchant))
+                {
+                    merchant.Clean();
+                    ctx.Reply($"Product successfully added to merchant '{merchantName}'");
+                }
+                else
+                {
+                    throw new MerchantDontExistException();
+                }
+            }
+            catch (MerchantDontExistException)
+            {
+                throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+            } 
+            catch (ProductExistException)
+            {
+                throw ctx.Error($"This product configuration already exists at merchant '{merchantName}'");
+            } 
+            catch (Exception e)
+            {
+                throw ctx.Error($"Error: {e.Message}");
+            }
+
+            
+        }
+
+        // .merchant product add Test1 736318803 -257494203 20 1 50
         [Command("add", usage: "<NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]", description: "Add a product to a merchant", adminOnly: true)]
         public void CreateProduct(ChatCommandContext ctx, string merchantName, int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Stock, bool Autorefill = false)
         {

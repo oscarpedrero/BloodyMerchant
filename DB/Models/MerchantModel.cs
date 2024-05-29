@@ -54,6 +54,20 @@ namespace BloodyMerchant.DB.Models
             return true;
         }
 
+        public bool Clean()
+        {
+
+            items.Clear();
+            Database.saveDatabase();
+            if (GetEntity(name))
+            {
+                Addinventory(merchantEntity);
+            }
+
+            return true;
+
+        }
+
         public bool AddProduct(int ItemPrefabID, int CurrencyfabID, int Stack, int Price, int Amount, bool Autorefill)
         {
             if(!GetProduct(ItemPrefabID, out ItemModel item))
