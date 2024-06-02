@@ -5,6 +5,12 @@
 <details>
 <summary>Changelog</summary>
 
+`1.0.7`
+- Added cleanicons command. This command will delete all the icons on the map, if you have any active merchant it will also delete their icon. 
+- Added control of the number of items that can be added to a merchant. The limit is 33, after that number the client UI breaks.
+- Fixed the error that caused the merchant in some places to not display the items correctly.
+- System improvement and small fixes.
+
 `1.0.6`
 - Added a command to clear all items from a merchant
 

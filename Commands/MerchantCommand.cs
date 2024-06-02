@@ -1,4 +1,5 @@
 ﻿using Bloodstone.API;
+using Bloody.Core.Helper.v1;
 using BloodyMerchant.DB;
 using BloodyMerchant.DB.Models;
 using BloodyMerchant.Exceptions;
@@ -149,6 +150,25 @@ namespace BloodyMerchant.Commands
             {
                 throw ctx.Error($"Error: {e.Message}");
             }
+
+        }
+
+        [Command("cleanicons", usage: "", description: "Clean all icons.", adminOnly: true)]
+        public void CleanIcons(ChatCommandContext ctx, string merchantName)
+        {
+
+            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+            foreach (var entity in entities)
+            {
+                NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
+                if (_nameableInteractable.Name.Value.Contains("_icon"))
+                {
+                    StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, entity, ctx.Event.SenderUserEntity, ctx.Event.SenderUserEntity, 0, StatChangeReason.Any, true);
+                }
+            }
+            entities.Dispose();
+
+            ctx.Reply($"All icons have been deleted, if you had any active merchants in the world you should recreate them if you want them to have an icon.");
 
         }
     }

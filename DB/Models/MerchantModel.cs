@@ -112,7 +112,7 @@ namespace BloodyMerchant.DB.Models
                     {
                         Addinventory(e);
                     };
-                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 3);
                 });
 
                 return true;
@@ -154,7 +154,8 @@ namespace BloodyMerchant.DB.Models
 
             var i = 0;
             foreach (var item in _items)
-            {
+            {   
+                if (i > 32) break;
                 _tradeOutputBuffer.Add(new TradeOutput
                 {
                     Amount = (ushort)item.OutputAmount,
@@ -184,7 +185,7 @@ namespace BloodyMerchant.DB.Models
             {
                 AddIcon(merchant);
             };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 10);
+            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 3);
         }
 
         internal bool AddRealtimeObjet(ItemModel item)

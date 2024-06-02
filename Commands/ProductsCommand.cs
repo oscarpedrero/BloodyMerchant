@@ -97,6 +97,10 @@ namespace BloodyMerchant.Commands
             {
                 if(Database.GetMerchant(merchantName, out MerchantModel merchant))
                 {
+                    if (merchant.items.Count >= 33)
+                    {
+                        throw ctx.Error($"Maximum products reached. The maximum number of items you can add to a merchant is 33.");
+                    }
                     merchant.AddProduct(ItemPrefabID, CurrencyfabID, Stack, Price, Stock, Autorefill);
                     if (merchant.config.IsEnabled)
                     {
