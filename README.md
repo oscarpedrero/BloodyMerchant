@@ -119,6 +119,11 @@ Only merchant PrefabGUIDs are supported.
 - Kills the desired merchant.
   - Example: `.bm kill test`
 ```ansi
+.bm cleanicon
+```
+- This command will delete all the icons on the map, if you have any active merchant it will also delete their icon. 
+  - Example: `.bm cleanicon`
+```ansi
 .bm product add <NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]
 ```
 - Adds products to the merchant in real-time.
