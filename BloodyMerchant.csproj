@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -16,7 +16,8 @@
 	  <PackageReference Include="VRising.Unhollowed.Client" Version="1.0.*" />
 	  <PackageReference Include="VRising.VampireCommandFramework" Version="0.9.*" />
 	  <PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
-	  <PackageReference Include="Bloody.Core" Version="1.2.*" />
+	  <PackageReference Include="Bloody.Core" Version="1.2.4" />
+	  <PackageReference Include="Bloody.Wallet" Version="0.1.1" />
   </ItemGroup>
 	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration' == 'Release'">
 		<Copy SourceFiles="$(OutDir)\$(ProjectName).dll" DestinationFolder="$(SolutionDir)/dist" />

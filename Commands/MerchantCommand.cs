@@ -94,31 +94,31 @@ namespace BloodyMerchant.Commands
         [Command("spawn", usage: "<NameOfMerchant>", description: "Spawn a merchant in your location", adminOnly: true)]
         public void Spawn(ChatCommandContext ctx, string merchantName)
         {
-            try
+            //try
+            //{
+            if (Database.GetMerchant(merchantName, out MerchantModel merchant))
             {
-                if (Database.GetMerchant(merchantName, out MerchantModel merchant))
-                {
-                    Entity user = ctx.Event.SenderUserEntity;
-                    var pos = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(user).Position;
-                    merchant.SpawnWithLocation(user, pos);
-                    ctx.Reply($"Merchant '{merchantName}' has spawned correctly");
-                } else
-                {
-                    throw new MerchantDontExistException();
-                }
-            }
-            catch (MerchantDontExistException)
+                Entity user = ctx.Event.SenderUserEntity;
+                var pos = VWorld.Server.EntityManager.GetComponentData<LocalToWorld>(user).Position;
+                merchant.SpawnWithLocation(user, pos);
+                ctx.Reply($"Merchant '{merchantName}' has spawned correctly");
+            } else
             {
-                throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+                throw new MerchantDontExistException();
             }
-            catch (MerchantEnableException)
-            {
-                throw ctx.Error($"Merchant with name '{merchantName}' already in world.");
-            }
-            catch (Exception e)
-            {
-                throw ctx.Error($"Error: {e.Message}");
-            }
+            //}
+            //catch (MerchantDontExistException)
+            //{
+            // throw ctx.Error($"Merchant with name '{merchantName}' does not exist.");
+            //}
+            //catch (MerchantEnableException)
+            //{
+            // throw ctx.Error($"Merchant with name '{merchantName}' already in world.");
+            //}
+            //catch (Exception e)
+            //{
+            //throw ctx.Error($"Error: {e.Message}");
+            // }
         }
 
         // .merchant kill Test1

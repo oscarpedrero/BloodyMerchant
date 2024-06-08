@@ -28,6 +28,7 @@ namespace BloodyMerchant.Systems
 
                     foreach (var merchant in Database.Merchants.Where(x => x.name == name).ToList())
                     {
+
                         merchant.Refill(_trader, _event);
 
                         

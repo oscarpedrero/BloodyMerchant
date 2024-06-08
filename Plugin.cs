@@ -9,6 +9,10 @@ using BloodyMerchant.DB;
 using System.Linq;
 using BloodyMerchant.Systems;
 using Bloody.Core.API.v1;
+using Bloody.Core;
+using BepInEx.Configuration;
+using UnityEngine;
+using ProjectM.Physics;
 
 namespace BloodyMerchant
 {
@@ -16,6 +20,7 @@ namespace BloodyMerchant
     [BepInDependency("gg.deca.Bloodstone")]
     [BepInDependency("gg.deca.VampireCommandFramework")]
     [BepInDependency("trodi.Bloody.Core")]
+    [BepInDependency("trodi.bloody.Wallet", BepInDependency.DependencyFlags.SoftDependency)]
     public class Plugin : BasePlugin, IRunOnInitialized
     {
 
@@ -23,6 +28,10 @@ namespace BloodyMerchant
         private Harmony _harmony;
 
         public static World World;
+
+        public static SystemsCore SystemsCore;
+
+        public static ConfigEntry<bool> WalletSystem;
 
         public override void Load()
         {
@@ -36,12 +45,17 @@ namespace BloodyMerchant
 
             CommandRegistry.RegisterAll();
 
+            InitConfigServer();
+
             Database.Initialize();
 
             // Plugin startup logic
             Log.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
         }
-
+        private void InitConfigServer()
+        {
+            WalletSystem = Config.Bind("Wallet", "enabled", false, "Activate system for buy with virtual currency through BloodyWallet ( https://thunderstore.io/c/v-rising/p/Trodi/BloodyWallet/ )");
+        }
         public override bool Unload()
         {
             Config.Clear();
@@ -58,18 +72,25 @@ namespace BloodyMerchant
 
         private static void GameDataOnInitialize(World world)
         {
-            Logger.LogDebug("GameDataOnInitialize");
 
+            SystemsCore = Core.SystemsCore;
             EventsHandlerSystem.OnTraderPurchase += AutorefillSystem.OnTraderPurchase;
             EventsHandlerSystem.OnDeath += DeathEventSystem.OnDeath;
-
-            foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
+            if (WalletSystem.Value)
             {
+                VirtualBuySystem.MakeSpecialCurrenciesSoulbound();
+                EventsHandlerSystem.OnPlayerBuffed += VirtualBuySystem.HandleOnPlayerBuffed;
+                EventsHandlerSystem.OnPlayerBuffRemoved += VirtualBuySystem.HandleOnPlayerBuffRemoved;
+            }
 
+            /*foreach (var merchant in Database.Merchants.Where(x => x.config.Autorepawn == false).ToList())
+            {
                 Logger.LogDebug($"kill Autorespawn Merchant {merchant.name} off");
                 merchant.KillMerchant(UserSystem.GetAnyUser());
+            }*/
 
-            }
+            Logger.LogInfo("GameDataOnInitialize BloodyMerchant");
+
         }
 
         private static void GameDataOnDestroy()

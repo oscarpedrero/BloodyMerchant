@@ -1,8 +1,9 @@
 ﻿using Bloodstone.API;
 using Bloody.Core.API.v1;
 using Bloody.Core.Helper.v1;
+using Bloody.Core.Patch.Server;
 using BloodyMerchant.Exceptions;
-using BloodyMerchant.Patch;
+using BloodyMerchant.Systems;
 using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
@@ -112,8 +113,29 @@ namespace BloodyMerchant.DB.Models
                     {
                         Addinventory(e);
                     };
-                    ActionSchedulerPatch.RunActionOnceAfterFrames(action, 3);
+                    CoroutineHandler.StartFrameCoroutine(action, 3, 1);
                 });
+
+                var entityManager = Plugin.SystemsCore.EntityManager;
+                var actionIcon = () =>
+                {
+                    SpawnSystem.SpawnUnitWithCallback(sender, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) =>
+                    {
+                        icontEntity = e;
+                        e.Add<MapIconData>();
+                        e.Add<MapIconTargetEntity>();
+                        var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
+                        mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchantEntity);
+                        mapIconTargetEntity.TargetNetworkId = merchantEntity.Read<NetworkId>();
+                        e.Write(mapIconTargetEntity);
+                        e.Add<NameableInteractable>();
+                        NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
+                        _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
+                        e.Write(_nameableInteractable);
+                    });
+                };
+                ActionScheduler.RunActionOnceAfterDelay(actionIcon, 3);
+
 
                 return true;
             }
@@ -142,11 +164,14 @@ namespace BloodyMerchant.DB.Models
 
         public void Addinventory(Entity merchant)
         {
+            var entityManager = Plugin.SystemsCore.EntityManager;
+            var unitSpawnerUpdateSystem = Plugin.SystemsCore.UnitSpawnerUpdateSystem;
+
             var _items = GetTraderItems();
 
-            var _tradeOutputBuffer = merchant.ReadBuffer<TradeOutput>();
-            var _traderEntryBuffer = merchant.ReadBuffer<TraderEntry>();
-            var _tradeCostBuffer = merchant.ReadBuffer<TradeCost>();
+            var _tradeOutputBuffer = entityManager.GetBuffer<TradeOutput>(merchant);
+            var _traderEntryBuffer = entityManager.GetBuffer<TraderEntry>(merchant);
+            var _tradeCostBuffer = entityManager.GetBuffer<TradeCost>(merchant);
 
             _tradeOutputBuffer.Clear();
             _traderEntryBuffer.Clear();
@@ -154,7 +179,7 @@ namespace BloodyMerchant.DB.Models
 
             var i = 0;
             foreach (var item in _items)
-            {   
+            {
                 if (i > 32) break;
                 _tradeOutputBuffer.Add(new TradeOutput
                 {
@@ -180,12 +205,24 @@ namespace BloodyMerchant.DB.Models
                 });
                 i++;
             }
+        }
 
-            var action = () =>
-            {
-                AddIcon(merchant);
-            };
-            ActionSchedulerPatch.RunActionOnceAfterFrames(action, 3);
+        public void CreateIcon(Entity sender)
+        {
+
+            var entityManager = Plugin.SystemsCore.EntityManager;
+            var unitSpawnerUpdateSystem = Plugin.SystemsCore.UnitSpawnerUpdateSystem;
+
+            icontEntity.Add<MapIconData>();
+            icontEntity.Add<MapIconTargetEntity>();
+            var mapIconTargetEntity = icontEntity.Read<MapIconTargetEntity>();
+            mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchantEntity);
+            mapIconTargetEntity.TargetNetworkId = merchantEntity.Read<NetworkId>();
+            icontEntity.Write(mapIconTargetEntity);
+            icontEntity.Add<NameableInteractable>();
+            NameableInteractable _nameableInteractable = icontEntity.Read<NameableInteractable>();
+            _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
+            icontEntity.Write(_nameableInteractable);
         }
 
         internal bool AddRealtimeObjet(ItemModel item)
@@ -245,23 +282,6 @@ namespace BloodyMerchant.DB.Models
 
         }
 
-        public void AddIcon(Entity merchant)
-        {
-            SpawnSystem.SpawnUnitWithCallback(merchant, Prefabs.MapIcon_POI_Discover_Merchant, new float2(config.x, config.z), -1, (Entity e) => {
-                icontEntity = e;
-                e.Add<MapIconData>();
-                e.Add<MapIconTargetEntity>();
-                var mapIconTargetEntity = e.Read<MapIconTargetEntity>();
-                mapIconTargetEntity.TargetEntity = NetworkedEntity.ServerEntity(merchant);
-                mapIconTargetEntity.TargetNetworkId = merchant.Read<NetworkId>();
-                e.Write(mapIconTargetEntity);
-                e.Add<NameableInteractable>();
-                NameableInteractable _nameableInteractable = e.Read<NameableInteractable>();
-                _nameableInteractable.Name = new FixedString64Bytes(name + "_icon");
-                e.Write(_nameableInteractable);
-            });
-        }
-
         public void Refill(Entity merchant, TraderPurchaseEvent _event)
         {
             var _entryBuffer = merchant.ReadBuffer<TraderEntry>();
@@ -319,12 +339,14 @@ namespace BloodyMerchant.DB.Models
 
         private bool GetIcon( string nameMerchant )
         {
-            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.IncludeDisabledEntities);
+            var entities = QueryComponents.GetEntitiesByComponentTypes<NameableInteractable, MapIconData>(EntityQueryOptions.Default,true);
+            Plugin.Logger.LogInfo($"Encontrados {entities.Length}");
             foreach (var entity in entities)
             {
                 NameableInteractable _nameableInteractable = entity.Read<NameableInteractable>();
                 if (_nameableInteractable.Name.Value == nameMerchant + "_icon")
                 {
+                    Plugin.Logger.LogInfo($"Icono Encontrado");
                     icontEntity = entity;
                     entities.Dispose();
                     return true;
@@ -409,25 +431,39 @@ namespace BloodyMerchant.DB.Models
 
         public bool KillMerchant(Entity user)
         {
-            if (GetIcon(name))
+
+            if (GetEntity(name))
             {
-                StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, icontEntity, user, user, 0, StatChangeReason.Any, true);
+                CleanIconMerchant(user);
+                config.IsEnabled = false;
+                StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, merchantEntity, user, user, 0, StatChangeReason.Any, true);
+                return true;
+            }
+            else
+            {
+                Plugin.Logger.LogDebug($"Entity of merchant not found");
+                throw new MerchantDontExistException();
             }
 
+
+        }
+
+        public bool CleanIconMerchant(Entity user)
+        {
+            if (!icontEntity.Exists())
             {
-                if (GetEntity(name))
+                if (!GetIcon(name))
                 {
-                    config.IsEnabled = false;
-                    StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, merchantEntity, user, user, 0, StatChangeReason.Any, true);
+                    Plugin.Logger.LogInfo($"Entity icon not found");
                     return true;
                 }
-                else
-                {
-                    Plugin.Logger.LogDebug($"Entity of merchant not found");
-                    throw new MerchantDontExistException();
-                }
-
             }
+            icontEntity.Remove<MapIconData>();
+            icontEntity.Remove<MapIconTargetEntity>();
+            icontEntity.Remove<NameableInteractable>();
+            StatChangeUtility.KillOrDestroyEntity(Plugin.World.EntityManager, icontEntity, user, user, 0, StatChangeReason.Any, true);
+            Plugin.Logger.LogInfo($"Entity icon remove");
+            return true;
         }
 
     }

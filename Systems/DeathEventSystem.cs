@@ -3,6 +3,7 @@ using ProjectM;
 using System.Linq;
 using Unity.Collections;
 
+
 namespace BloodyMerchant.Systems;
 
 public class DeathEventSystem
@@ -23,7 +24,10 @@ public class DeathEventSystem
 
                 foreach (var merchant in Database.Merchants.Where(x => x.name == name).ToList())
                 {
-                    merchant.KillMerchant(ev.Killer);
+                    if(merchant.merchantEntity.Exists())
+                    {
+                        merchant.CleanIconMerchant(ev.Killer);
+                    }
                 }
             }
          }

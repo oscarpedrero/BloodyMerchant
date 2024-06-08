@@ -2,8 +2,33 @@
 
 **BloodyMerchant** is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay ( Vrising 1.0 ).
 
+## IMPORTANT NOTE
+
+## For the mod to work correctly you need Bloody.Core version 1.2.4 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
+
+## NEW IN 1.0.8
+
+- Now you can use [BloodyWallet](https://thunderstore.io/c/v-rising/p/Trodi/BloodyWallet/) to buy at the merchant with virtual currencies. Check the configuration file to activate this option.
+
+# Instructions for BloodyWallet
+
+1.- Edit the file ` config/trodi.Bloody.Wallet.cfg` and configure the PrefabGUID you want to use to purchase from the merchant in the `prefabGUIDExchange` option. 
+2.- Edit the file ` config/BloodyMerchant.cfg` and set the value true to the `enabled` option.
+
+
+The Prefab that you configured in Bloody.Wallet will appear in your inventory immediately after opening the merchant's store, if you do not have enough space it will not let you open a purchasing window.
+
+**This Prefab cannot be thrown to the ground or picked up from the ground so you must take into account configuring a Prefab that is not used in the game such as [Crystals](https://vrising.gaming.tools/items /item_ingredient_crystal) or [Witchdust](https://vrising.gaming.tools/items/item_ingredient_witchdust) to avoid problems**
+
+You can configure the merchant with other purchase items other than the BloodyWallet Prefab. It still works in the same way, but the ideal is that you change all of them to the BloodyWallet Prefab, so any object from your merchants can be purchased with the virtual currency.
+
+
 <details>
 <summary>Changelog</summary>
+
+`1.0.8`
+- Updated the timer system through Coroutine that brings the new version of Bloody.Core
+- Now you can use BloodyWallet to buy at the merchant with virtual currencies.
 
 `1.0.7`
 - Added cleanicons command. This command will delete all the icons on the map, if you have any active merchant it will also delete their icon. 
