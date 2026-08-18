@@ -4,27 +4,24 @@
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>BloodyMerchant</AssemblyName>
     <Description>Create VRising NPC merchant</Description>
-    <Version>1.0.8</Version>
+    <Version>1.1.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.691" IncludeAssets="compile" />
-	  <PackageReference Include="BepInEx.Core" Version="6.0.0-be.691" IncludeAssets="compile" />
+	  <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
+	  <PackageReference Include="BepInEx.Core" Version="6.0.0-be.733" IncludeAssets="compile" />
 	  <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-	  <PackageReference Include="VRising.Unhollowed.Client" Version="1.0.*" />
-	  <PackageReference Include="VRising.VampireCommandFramework" Version="0.9.*" />
-	  <PackageReference Include="VRising.Bloodstone" Version="0.1.*" />
-	  <PackageReference Include="Bloody.Core" Version="1.2.4" />
+	  <PackageReference Include="VRising.Unhollowed.Client" Version="1.1.*" />
+	  <PackageReference Include="VRising.VampireCommandFramework" Version="0.*" />
+	  <PackageReference Include="Bloody.Core" Version="2.0.*" />
 	  <PackageReference Include="Bloody.Wallet" Version="0.1.1" />
   </ItemGroup>
-	<Target Name="Thunderstore Copy to Dist" AfterTargets="AfterBuild" Condition=" '$(Configuration' == 'Release'">
-		<Copy SourceFiles="$(OutDir)\$(ProjectName).dll" DestinationFolder="$(SolutionDir)/dist" />
-	</Target>
-	<Target Name="CopyDLLsServer" AfterTargets="Build">
-		<Message Text="DLL to V Rising Server" Importance="High" />
-		<Copy SourceFiles="$(TargetDir)$(ProjectName).dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\VRising\VRising_Server\BepInEx\plugins\" />
-		<Message Text="DLL Server Copied OK" Importance="High" />
-	</Target>
+
+  <!-- Bloodstone package reference removed.
+       The old "CopyDLLsServer" target was also removed - it pointed at a hardcoded
+       Steam path that does not exist on every machine and fails the build. -->
+
 </Project>

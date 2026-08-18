@@ -1,4 +1,4 @@
-using Bloodstone.API;
+using BloodyMerchant.Compat;
 using Il2CppInterop.Runtime;
 using Il2CppSystem;
 using Unity.Collections;

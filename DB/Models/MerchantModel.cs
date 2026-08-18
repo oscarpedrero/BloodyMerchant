@@ -1,4 +1,4 @@
-﻿using Bloodstone.API;
+using BloodyMerchant.Compat;
 using Bloody.Core.API.v1;
 using Bloody.Core.Helper.v1;
 using Bloody.Core.Patch.Server;
@@ -8,6 +8,7 @@ using ProjectM;
 using ProjectM.Network;
 using ProjectM.Shared;
 using Stunlock.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
@@ -103,7 +104,8 @@ namespace BloodyMerchant.DB.Models
             if (!config.IsEnabled)
             {
 
-                SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new(pos.x, pos.z), -1, (Entity e) => {
+                // V Rising 1.1 added a float3 overload, so 'new(...)' became ambiguous. Be explicit.
+                SpawnSystem.SpawnUnitWithCallback(sender, new PrefabGUID(PrefabGUID), new float2(pos.x, pos.z), -1, (Entity e) => {
                     merchantEntity = e;
                     config.z = pos.z;
                     config.x = pos.x;
@@ -181,6 +183,25 @@ namespace BloodyMerchant.DB.Models
             foreach (var item in _items)
             {
                 if (i > 32) break;
+
+                // An item GUID that doesn't exist in the game makes the client throw
+                // "[TRADER] - Trader Sync Error!" every frame and the shop shows up empty,
+                // with nothing in the server log to explain it. Say so plainly instead.
+                if (item.OutputItem.LookupName().StartsWith("GUID Not Found"))
+                {
+                    Plugin.Logger.LogWarning(
+                        $"Merchant '{name}': item {item.OutputItem.GuidHash} is not a real item in this version of V Rising. " +
+                        $"Skipping it - leaving it in would make the whole shop fail to load.");
+                    continue;
+                }
+                if (item.InputItem.LookupName().StartsWith("GUID Not Found"))
+                {
+                    Plugin.Logger.LogWarning(
+                        $"Merchant '{name}': currency {item.InputItem.GuidHash} is not a real item in this version of V Rising. " +
+                        $"Skipping the trade for {item.OutputItem.LookupName()}.");
+                    continue;
+                }
+
                 _tradeOutputBuffer.Add(new TradeOutput
                 {
                     Amount = (ushort)item.OutputAmount,
@@ -205,6 +226,8 @@ namespace BloodyMerchant.DB.Models
                 });
                 i++;
             }
+
+            Plugin.Logger.LogInfo($"Merchant '{name}': loaded {_tradeOutputBuffer.Length} of {_items.Count} trade(s).");
         }
 
         public void CreateIcon(Entity sender)
@@ -358,7 +381,11 @@ namespace BloodyMerchant.DB.Models
 
         public bool MakeNPCDontMove(Entity user, Entity merchant)
         {
-            var buff = Prefabs.Buff_BloodQuality_T01_OLD;
+            // V Rising 1.1 deleted every "_OLD" prefab, including Buff_BloodQuality_T01_OLD.
+            // This buff is only a carrier for the MovementImpair flag set below, so any
+            // invisible NPC buff works. Using a live sibling of the one MakeNPCImmortal
+            // uses, so the two buffs stay distinct and can be added/removed independently.
+            var buff = Prefabs.Buff_ChurchOfLight_Paladin_ImmaterialHomePos;
             var _des = VWorld.Server.GetExistingSystemManaged<DebugEventsSystem>();
             var _event = new ApplyBuffDebugEvent() { BuffPrefabGUID = buff };
             var _from = new FromCharacter()
