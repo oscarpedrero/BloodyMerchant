@@ -1,9 +1,9 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
 using Unity.Entities;
-using Bloodstone.API;
+using BloodyMerchant.Compat;
 using VampireCommandFramework;
 using BloodyMerchant.DB;
 using System.Linq;
@@ -17,11 +17,14 @@ using ProjectM.Physics;
 namespace BloodyMerchant
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    [BepInDependency("gg.deca.Bloodstone")]
+    // Bloodstone dependency removed - it is abandoned and its network hooks break
+    // every server network event on V Rising 1.1.x. BloodyCore already provides the
+    // initialization event this mod actually uses.
+    [BepInProcess("VRisingServer.exe")]
     [BepInDependency("gg.deca.VampireCommandFramework")]
     [BepInDependency("trodi.Bloody.Core")]
     [BepInDependency("trodi.bloody.Wallet", BepInDependency.DependencyFlags.SoftDependency)]
-    public class Plugin : BasePlugin, IRunOnInitialized
+    public class Plugin : BasePlugin
     {
 
         public static ManualLogSource Logger;
@@ -72,6 +75,9 @@ namespace BloodyMerchant
 
         private static void GameDataOnInitialize(World world)
         {
+            // Bloodstone's OnGameInitialized used to set this. BloodyCore hands us the
+            // world directly, so we no longer need Bloodstone for it.
+            World = world ?? Compat.VWorld.Server;
 
             SystemsCore = Core.SystemsCore;
             EventsHandlerSystem.OnTraderPurchase += AutorefillSystem.OnTraderPurchase;
@@ -98,10 +104,7 @@ namespace BloodyMerchant
             Logger.LogDebug("GameDataOnDestroy");
         }
 
-        public void OnGameInitialized()
-        {
-            World = VWorld.Server;
-            Logger.LogDebug("OnGameInitialized");
-        }
+        // OnGameInitialized() removed - that was Bloodstone's IRunOnInitialized hook and
+        // its only job was setting World, which GameDataOnInitialize now handles.
     }
 }

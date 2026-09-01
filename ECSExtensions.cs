@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
-using Bloodstone.API;
+using BloodyMerchant.Compat;
 using Bloody.Core;
 using Il2CppInterop.Runtime;
 using ProjectM;
@@ -74,11 +74,24 @@ public static class ECSExtensions
         return GetEntityManager().HasComponent(entity, ct);
     }
 
+    // V Rising 1.1: PrefabGuidToNameDictionary was removed.
+    // The current lookup is PrefabCollectionSystem._PrefabDataLookup (PrefabGUID -> PrefabData).
     public static string LookupName(this PrefabGUID prefabGuid)
     {
-        var prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
-        return (prefabCollectionSystem.PrefabGuidToNameDictionary.ContainsKey(prefabGuid)
-            ? prefabCollectionSystem.PrefabGuidToNameDictionary[prefabGuid] + " " + prefabGuid : "GUID Not Found").ToString();
+        try
+        {
+            var prefabCollectionSystem = VWorld.Server.GetExistingSystemManaged<PrefabCollectionSystem>();
+            var lookup = prefabCollectionSystem._PrefabDataLookup;
+
+            if (lookup.TryGetValue(prefabGuid, out var prefabData))
+                return prefabData.AssetName.Value + " " + prefabGuid;
+        }
+        catch
+        {
+            // fall through to the not-found result below
+        }
+
+        return "GUID Not Found " + prefabGuid;
     }
 
     public static void Add<T>(this Entity entity)

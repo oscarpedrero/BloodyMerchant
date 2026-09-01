@@ -1,219 +1,272 @@
-# BloodyMerchant
+# BloodyMerchant — revived for V Rising 1.1
 
-**BloodyMerchant** is a mod designed for V Rising, offering the capability to create custom in-game merchants, adding a layer of dynamic and immersive gameplay ( Vrising 1.0 ).
+**This is a community fix, not a new mod.** All the design and original code belong to
+[oscarpedrero](https://github.com/oscarpedrero/BloodyMerchant) and Trodi. I only got it
+running again on the current game version.
 
-## IMPORTANT NOTE
+Original project: https://github.com/oscarpedrero/BloodyMerchant
 
-## For the mod to work correctly you need Bloody.Core version 1.2.4 or higher. This is very important because otherwise the mod will not work. Updating this library does not break any of your other mods.
+---
 
-## NEW IN 1.0.8
+## What this is
 
-- Now you can use [BloodyWallet](https://thunderstore.io/c/v-rising/p/Trodi/BloodyWallet/) to buy at the merchant with virtual currencies. Check the configuration file to activate this option.
+BloodyMerchant lets server admins place custom NPC traders anywhere in the world and
+decide exactly what they sell and what they charge for it.
 
-# Instructions for BloodyWallet
+It stopped working when V Rising went to 1.1. This fork gets it working again.
 
-1.- Edit the file ` config/trodi.Bloody.Wallet.cfg` and configure the PrefabGUID you want to use to purchase from the merchant in the `prefabGUIDExchange` option. 
-2.- Edit the file ` config/BloodyMerchant.cfg` and set the value true to the `enabled` option.
+**Tested on:** `VRisingServer v1.1.13.0-r99712-b17`, BepInEx `6.0.0-be.733`,
+VampireCommandFramework `0.11.0`, BloodyCore `2.0.2`.
 
+---
 
-The Prefab that you configured in Bloody.Wallet will appear in your inventory immediately after opening the merchant's store, if you do not have enough space it will not let you open a purchasing window.
+## Read this first — Bloodstone
 
-**This Prefab cannot be thrown to the ground or picked up from the ground so you must take into account configuring a Prefab that is not used in the game such as [Crystals](https://vrising.gaming.tools/items /item_ingredient_crystal) or [Witchdust](https://vrising.gaming.tools/items/item_ingredient_witchdust) to avoid problems**
+The original build depended on **Bloodstone**, which is abandoned and now actively
+harmful on 1.1. It loads without complaint and then throws `MissingMethodException`
+on network traffic, which breaks unrelated things across your whole server. It is
+genuinely hard to diagnose, because the mod that breaks is rarely the one you're
+looking at.
 
-You can configure the merchant with other purchase items other than the BloodyWallet Prefab. It still works in the same way, but the ideal is that you change all of them to the BloodyWallet Prefab, so any object from your merchants can be purchased with the virtual currency.
+**This build does not use Bloodstone at all. Remove it.**
 
+---
 
-<details>
-<summary>Changelog</summary>
+## What was broken, and what fixed it
 
-`1.0.8`
-- Updated the timer system through Coroutine that brings the new version of Bloody.Core
-- Now you can use BloodyWallet to buy at the merchant with virtual currencies.
+Five separate problems. Four were code that no longer compiled against 1.1. The fifth
+only showed up in-game.
 
-`1.0.7`
-- Added cleanicons command. This command will delete all the icons on the map, if you have any active merchant it will also delete their icon. 
-- Added control of the number of items that can be added to a merchant. The limit is 33, after that number the client UI breaks.
-- Fixed the error that caused the merchant in some places to not display the items correctly.
-- System improvement and small fixes.
+### 1. Bloodstone dependency
 
-`1.0.6`
-- Added a command to clear all items from a merchant
+Removed entirely. Bloodstone's only real job here was handing the mod the ECS `World`
+and firing an "the game is ready" callback. BloodyCore 2.0.2 already does both.
 
-`1.0.5`
-- Add or remove items from merchant in real time
+- Added a small `Compat/VWorld.cs` that finds the server world directly
+- Dropped `[BepInDependency("gg.deca.Bloodstone")]`, `IRunOnInitialized`, and `OnGameInitialized()`
+- The world now arrives through BloodyCore's `EventsHandlerSystem.OnInitialize`
+- Added `[BepInProcess("VRisingServer.exe")]` so it can't try to load on a client
 
-`1.0.4`
-- Bloody.Core dependency removed as dll and added as framework
+### 2. `PrefabCollectionSystem.PrefabGuidToNameDictionary` was deleted
 
-`1.0.3`
-- Refactored the Patch system
-- Added Bloody.Core.
-- Added restriction to the create command so that only valid merchant PrefabsGUIDs can be added
-- Improved performance.
+```
+error CS1061: 'PrefabCollectionSystem' does not contain a definition for 'PrefabGuidToNameDictionary'
+```
 
-`1.0.0`
-- Fix with Autorespawn
-- Updated to a VRising 1.0 
-- Added the functionality to show the icon on the merchant map
+1.1 replaced it with `_PrefabDataLookup`, which maps `PrefabGUID → PrefabData`, and the
+readable name now lives at `.AssetName.Value`. `LookupName()` in `ECSExtensions.cs` was
+rewritten against the new lookup.
 
-`0.2.0`
-- Fix Autorefill
-- Fixed a problem with products that did not work correctly
+### 3. `SpawnUnitWithCallback` became ambiguous
 
-`0.1.0`
-- Fix Autorefill by [@Backxtar](https://github.com/Backxtar)
+```
+error CS0121: The call is ambiguous between
+  SpawnSystem.SpawnUnitWithCallback(Entity, PrefabGUID, float2, float, Action<Entity>)
+  SpawnSystem.SpawnUnitWithCallback(Entity, PrefabGUID, float3, float, Action<Entity>)
+```
 
-`0.0.1`
-- Initial public release of the mod
-</details>
+1.1 added a `float3` overload. The original code used a target-typed `new(pos.x, pos.z)`,
+which the compiler could no longer resolve. Made explicit: `new float2(pos.x, pos.z)`.
 
-# Support this project
+### 4. `Prefabs.Buff_BloodQuality_T01_OLD` no longer exists
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
+1.1 removed every `_OLD` prefab. That buff was only ever a carrier for the
+`BuffModificationTypes.MovementImpair` flag that keeps a merchant standing still —
+the buff itself did nothing visible. Swapped for
+`Buff_ChurchOfLight_Paladin_ImmaterialHomePos`, a live sibling of the buff
+`MakeNPCImmortal` already uses, so the two stay independent.
 
-## Mod Features
-BloodyMerchant is a key component of the Blood Mod Pack. This plugin empowers you to craft personalized in-game traders, akin to BloodyShop. However, it leverages in-game traders, providing a more dynamic and immersive experience.
+### 5. A bad item ID silently killed the entire shop
 
-# Requirements
+This one only appeared in-game, and it's the reason this fork also ships a real
+improvement rather than just a port.
 
-1. [BepInEx](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
-2. [Bloodstone](https://thunderstore.io/c/v-rising/p/deca/Bloodstone/)
-3. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
-4. [Bloody.Core](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
+**Symptom:** merchant spawns fine, stands still, talks, can be killed and cleaned up —
+but his shop window is completely empty. Server log is spotless. Client log fills with:
+
+```
+[Error : Unity]  -- [TRADER] - Trader Sync Error!
+```
+
+hundreds of times a second.
+
+**Cause:** one of the item IDs in `merchants.json` was not a real prefab in this version
+of the game. V Rising's own `TraderSyncSystem` refuses to send *any* of the trader's
+stock to the client if it can't resolve *one* item — so a single bad ID empties the
+whole shop, with nothing server-side to explain why.
+
+**Fix:** every trade row is now validated before it's written. An unresolvable item is
+skipped with a plain-English warning naming the exact ID:
+
+```
+Merchant 'MyShop': item -257358505 is not a real item in this version of V Rising.
+Skipping it - leaving it in would make the whole shop fail to load.
+```
+
+One bad row no longer takes the shop down with it.
+
+---
+
+## How this was actually found
+
+Worth writing down, because the first four fixes were straightforward and this one
+was not.
+
+1. **Made it compile.** Removed Bloodstone, fixed the three API breaks. Four errors, four fixes.
+   Build clean, mod loaded, `GameDataOnInitialize` fired. Looked done.
+
+2. **Tested in-game.** Merchant spawned, stayed put, could be killed. Shop was empty.
+
+3. **Checked the server log.** Nothing. No errors, no warnings, no exceptions. Dead end.
+
+4. **Checked the *client* log** — and there it was: `[TRADER] - Trader Sync Error!`,
+   over and over, starting the instant the merchant spawned. The failure was happening
+   on the game's side, not the mod's, which is why the server had nothing to say.
+
+5. **Resisted guessing.** Two earlier guesses in this project had already cost a round trip
+   each. Instead: built a temporary diagnostic version that logged everything the mod does
+   to the merchant entity — which components it has, what the game's own prefab shipped
+   with, every trade row written with item names resolved, buffer lengths before and
+   after, index range checks, inventory state.
+
+6. **Ran it once.** The dump was ~60 lines. Everything was green — real trader prefab,
+   all three buffers present, lengths matched, indexes in range — except one line:
+
+   ```
+   output  -257358505 x1 -> GUID Not Found
+   cost    -257494203 x1 -> Item_Ingredient_Crystal
+   ```
+
+   The currency resolved. The item didn't. It was a bad ID in the test data all along.
+
+7. **Verified.** Rebuilt with a known-good ID. Leather appeared in the shop, purchase
+   went through, `Trader Sync Error` count in the log: **0**.
+
+8. **Turned the diagnostic into a feature.** The temporary logging came back out, but the
+   ID validation stayed in — because the trap that cost hours here will catch anyone
+   who ever typos an item ID.
+
+The lesson worth keeping: *when the server log is clean and the behaviour is still wrong,
+read the client log.* And when you don't know, instrument it — don't guess.
+
+---
 
 ## Installation
-1. Copy `BloodyMerchant.dll` to your `BepInEx/Plugins` directory.
-2. Launch the server to create the config file; all configurations can be done in real-time in-game.
 
-### Important note:
-The system is not in real time, that is, first we create the merchant, we add products to it and we spawn.
-If at any time we add or remove any product from the merchant we must kill it and spawn again!
+**Server-side only.** Players do not install anything.
 
-## Merchant PrefabGUIDs
+1. [BepInEx for V Rising](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
+2. [VampireCommandFramework](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/) 0.11.0+
+3. [BloodyCore](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/) 2.0.2+ — **Trodi's, unmodified, install from source**
+4. Drop `BloodyMerchant.dll` into `BepInEx/plugins/`
+5. **Remove Bloodstone if you have it**
 
-Only merchant PrefabGUIDs are supported.
+Optional: [Bloody.Wallet](https://thunderstore.io/c/v-rising/p/Trodi/BloodyWallet/) for currency support. Soft dependency — works fine without it.
 
-```ansi
-  "CHAR_Trader_Dunley_Gems_T02": 194933933,
-  "CHAR_Trader_Dunley_Herbs_T02": 233171451,
-  "CHAR_Trader_Dunley_Knowledge_T02": 281572043,
-  "CHAR_Trader_Dunley_RareGoods_T02": -1594911649,
-  "CHAR_Trader_Farbane_Gems_T01": -1168705805,
-  "CHAR_Trader_Farbane_Herbs_T01": -375258845,
-  "CHAR_Trader_Farbane_Knowledge_T01": -208499374,
-  "CHAR_Trader_Farbane_RareGoods_T01": -1810631919,
-  "CHAR_Trader_Gloomrot_T04": -1292194494,
-  "CHAR_Trader_Noctem_Major": 1631713257,
-  "CHAR_Trader_Noctem_Minor": 345283594,
-  "CHAR_Trader_Silverlight_Gems_T03": -1990875761,
-  "CHAR_Trader_Silverlight_Herbs_T03": 1687896942,
-  "CHAR_Trader_Silverlight_Knowledge_T03": -915182578,
-  "CHAR_Trader_Silverlight_RareGoods_T03": 739223277
-```
+---
 
 ## Commands
 
+All admin-only. Command group is `.bm`.
 
-```ansi
-.bm list
-```
-- Lists all available merchants on the server.
-```ansi
-.bm create <NameOfMerchant> [PrefabGUIDOfMerchant] [Immortal] [Move] [Autorespawn]
-```
-- Creates a custom merchant and adds it to the merchant's list.
-  - **NameOfMerchant**: Unique identifier for the merchant.
-  - **PrefabGUIDIfMerchant**: GUID for the merchant NPC to spawn.
-  - **Immortal (True/False)**: Makes the merchant immortal and impervious to damage.
-  - **Move (True/False)**: Enables or disables the merchant's movement.
-  - **Auto respawn (True/False)**: Respawns the merchant when the server is back online.
-  - Example: `.bm create test -208499374 true false true`
-```ansi
-.bm remove <NameOfMerchant>
-```
-- Removes the merchant from the list (requires killing the merchant while alive).
-  - Example: `.bm remove test`
-```ansi
-.bm spawn <NameOfMerchant>
-```
-- Spawns your custom merchant.
-  - Example: `.bm spawn test`
-```ansi
-.bm kill <NameOfMerchant>
-```
-- Kills the desired merchant.
-  - Example: `.bm kill test`
-```ansi
-.bm cleanicon
-```
-- This command will delete all the icons on the map, if you have any active merchant it will also delete their icon. 
-  - Example: `.bm cleanicon`
-```ansi
-.bm product add <NameOfMerchant> <ItemPrefabID> <CurrencyfabID> <Stack> <Price> <Stock> [Autorefill true/false]
-```
-- Adds products to the merchant in real-time.
-  - **NameOfMerchat**: Unique merchant name set previously.
-  - **ItemPrefabID**: Product item ID for the merchant to sell.
-  - **CurrencyfabID**: ID of the item used as currency to buy the product.
-  - **Stack**: Number of products received by the player for that item when purchased.
-  - **Price**: Amount of currency item players need to purchase the item.
-  - **Stock**: Availability of the item with the merchant (limited or unlimited, max is 99).
-  - **Autorefill (True/False)**: Allows players to buy the item infinitely.
-  - Example: `.bm product add test 1557814269 -77477508 1 1 99 true`
-```ansi
-.bm product remove <NameOfMerchant> <ItemPrefabID>
-```
-- Removes a product from the merchant in real-time.
-  - Example: `.bm product remove test 1557814269`
-```ansi
-.bm product clean <NameOfMerchant>
-```
-- Removes a product from the merchant in real-time.
-  - Example: `.bm product clean test`
-```ansi
-.bm product list <NameOfMerchant>
-```
-- Lists all products currently available for sale by a certain merchant.
-  - Example:  `.bm product list test`
-```ansi
-.bm config show <NameOfMerchant>
-```
-- Shows the Immortal, Move, and Autospawn configuration for a certain merchant.
-  - Example: `.bm config show test`
-```ansi
-.bm config immortal <NameOfMerchant> <true/false>
-```
-- Changes the immortal configuration for a certain merchant in real-time.
-  - Example: `.bm config immortal test true`
-```ansi
-.bm config move <NameOfMerchant> <true/false>
-```
-- Changes the move configuration for a certain merchant in real-time.
-  - Example: `.bm config move test true`
-```ansi
-.bm config autorespawn <NameOfMerchant> <true/false>
-```
-- Changes the auto-spawn configuration for a certain merchant in real-time.
-  - Example: `.bm config autorespawn test true`
+| Command | What it does |
+|---|---|
+| `.bm list` | List every merchant you've created |
+| `.bm create <name> [prefabID] [immortal] [canMove] [autorespawn]` | Create a merchant |
+| `.bm spawn <name>` | Place him in the world at your feet |
+| `.bm kill <name>` | Remove him from the world (keeps his config) |
+| `.bm remove <name>` | Delete him permanently |
+| `.bm cleanicons` | Clear orphaned map icons |
+| `.bm product add <merchant> <itemID> <currencyID> <stack> <price> <stock>` | Add something to sell |
+| `.bm product remove <merchant> <itemID> <currencyID>` | Remove a trade |
+| `.bm product list <merchant>` | List a merchant's trades |
+| `.bm product clean <merchant>` | Clear all trades |
 
-# Resourcess
+### create flags, in order
 
-[Complete items list of prefabs/GUID](https://discord.com/channels/978094827830915092/1117273637024714862/1117273642817044571)
+```
+.bm create Shop1 -1810631919 true false true
+                  |          |    |     |
+                  prefab     |    |     autorespawn
+                             |    canMove  ← false means he stays put
+                             immortal
+```
 
-# Credits
+Leave them off and you get the defaults: mortal, free to wander. If your merchant
+walks away, that's why.
 
-This mod idea was suggested by [@Vex](https://ideas.vrisingmods.com/posts/96/enhanced-traders) on our community idea tracker. Please vote and suggest your ideas [here](https://ideas.vrisingmods.com/).
+### create and spawn are not the same thing
 
-[V Rising Mod Community](https://discord.gg/vrisingmods) is the best community of mods for V Rising.
+This trips people up:
 
-[@Deca](https://github.com/decaprime), thank you for the exceptional frameworks [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework) and [BloodStone](https://github.com/decaprime/Bloodstone), based on [WetStone](https://github.com/molenzwiebel/Wetstone) by [@Molenzwiebel](https://github.com/molenzwiebel).
+- **create** writes him to `merchants.json`. Permanent. Do it once.
+- **spawn** puts him in the world
+- **kill** takes him out of the world — he still exists in the file
+- **remove** deletes him for good
 
-[@LecherousCthulhu](https://github.com/HasturDev) for sharing code on how to change the trader's inventory.
+"Merchant already exists" isn't an error to fix. It means he's already saved. Just spawn him.
 
-[@Willis](https://github.com/emelonakos) for being an amazing community modder, providing the initial code that helped bring this idea to life.
+---
 
-[@Backxtar](https://github.com/Backxtar) owner & founder of [Bloody Mary](https://discord.gg/sE2hqbxUU4) server, a talented modder who contributed by writing certain functions, debugging, and group efforts to make this mod work.
+## Verified item IDs
 
-**Special thanks to the testers and supporters of the project:**
+Pulled live from the game on 1.1.13. Use these to test — a bad ID is the single most
+common reason a shop shows up empty.
 
-- @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
+| Item | ID |
+|---|---|
+| Leather | `-1907572080` |
+| Coarse Thread | `-1562867444` |
+| Gravedust | `-608131642` |
+| Whetstone | `1252507075` |
+| Crystal | `-257494203` |
+| Straw Hat | `1375804543` |
+| Rusted Helmet | `1364460757` |
+| Necromancer Mitre | `607559019` |
+| Woodcutter Axe | `1541522788` |
+| Miner's Mace | `-687294429` |
+| Twilight Snapper | `-570287766` |
+| Fierce Stinger | `447901086` |
+
+Working example — sells Leather for 1 Crystal, 10 in stock:
+
+```
+.bm create Shop1 -1810631919 true false true
+.bm product add Shop1 -1907572080 -257494203 1 1 10
+.bm spawn Shop1
+```
+
+---
+
+## Credits
+
+- **[oscarpedrero](https://github.com/oscarpedrero)** — created BloodyMerchant. All the design is his.
+- **[Trodi](https://thunderstore.io/c/v-rising/p/Trodi/)** — BloodyCore, which this depends on and which is
+  already maintained for 1.1. None of Trodi's code was modified.
+- **[deca](https://github.com/decaprime)** — VampireCommandFramework
+- **BepInEx team** — the loader everything sits on
+- **The V Rising modding community** — for keeping the knowledge around after mods go quiet
+
+If oscarpedrero or Trodi want these changes upstream, they're welcome to them — no
+attribution needed, no PR required. Take the diff and run.
+
+---
+
+## Licensing
+
+The original project's license applies. This fork changes nothing about that. It exists
+so people can keep using the mod on 1.1, and it goes away happily the moment an official
+update lands.
+
+---
+
+## Support the fix
+
+Keeping abandoned mods alive is unpaid work. If this saved your server a headache and
+you'd like to throw something my way:
+
+**Cash App: `$Fartonice1081`**
+
+Entirely optional. The mod is free and always will be.
+
+*— Fartonice*
